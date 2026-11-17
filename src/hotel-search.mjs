@@ -79,6 +79,9 @@ export async function searchHotels(input, run, contract, browser = run.host.brow
   }
   const type = async (field, text) => {
     await inspect({ action: 'focus', field })
+    // Controlled inputs can ignore replacing a value with the same text. Clear
+    // the selected value with trusted input first so suggestions refresh.
+    for (const type of ['keyDown', 'keyUp']) await browser.cdp.send(tab.id, 'Input.dispatchKeyEvent', { type, key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8 })
     await browser.cdp.send(tab.id, 'Input.insertText', { text })
     await wait(state => normalized(state[field]) === normalized(text), '站点没有接受搜索文字', { action: 'inspect', field, text })
   }
@@ -96,14 +99,25 @@ export async function searchHotels(input, run, contract, browser = run.host.brow
     const state = await inspect()
     if (!state.controlsReady) throw new Error('没有匹配酒店搜索按钮')
     await click(state.button)
-    return wait(next => (next.url !== state.url || next.documentTime !== state.documentTime) && predicate(next), '搜索条件没有在结果页生效，停止返回酒店；请检查站点输入和日期')
+    let documentKey = '', stableSince = 0
+    return wait(next => {
+      // Ctrip updates history before replacing the document. A changed URL
+      // alone must not let the next input run against the outgoing page.
+      if (next.documentTime === state.documentTime || next.readyState !== 'complete' || !predicate(next)) { documentKey = ''; return false }
+      const key = `${next.documentTime}\n${next.url}`
+      if (key !== documentKey) { documentKey = key; stableSince = Date.now(); return false }
+      return Date.now() - stableSince >= 600
+    }, '搜索条件没有在结果页生效，停止返回酒店；请检查站点输入和日期')
   }
   try {
     await browser.cdp.attach(tab.id)
     await wait(state => state.controlsReady && state.readyState !== 'loading', '酒店搜索页尚未就绪，请检查浏览器')
     await type('city', normalizeCity(query.city))
     await choose('city', normalizeCity(query.city), true)
-    await submit(state => state.controlsReady && normalizeCity(new URL(state.url).searchParams.get('cityName') || '') === normalizeCity(query.city))
+    await submit(state => {
+      const params = new URL(state.url).searchParams
+      return state.controlsReady && normalizeCity(params.get('cityName') || params.get('destName') || '') === normalizeCity(query.city)
+    })
     await type('address', query.address)
     const selectedLocation = await choose('address', query.address, false)
     const state = await submit(state => state.controlsReady && state.readyState === 'complete' && checkHotelConditions(state, query))

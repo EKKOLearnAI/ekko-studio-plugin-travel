@@ -470,7 +470,7 @@
                 "properties": {
                   "raw": {
                     "type": "string",
-                    "description": "价格原文；未找到时为空。",
+                    "description": "价格可见原文与条件；携程明确当前价时排除其他金额，完整卡片文字仍保留于记录 text。未找到时为空。",
                     "maxLength": 300
                   },
                   "basis": {
@@ -820,7 +820,7 @@
                     "properties": {
                       "raw": {
                         "type": "string",
-                        "description": "价格原文；未找到时为空。",
+                        "description": "价格可见原文与条件；携程明确当前价时排除其他金额，完整卡片文字仍保留于记录 text。未找到时为空。",
                         "maxLength": 300
                       },
                       "basis": {
@@ -1336,7 +1336,7 @@
                     "properties": {
                       "raw": {
                         "type": "string",
-                        "description": "价格原文；未找到时为空。",
+                        "description": "价格可见原文与条件；携程明确当前价时排除其他金额，完整卡片文字仍保留于记录 text。未找到时为空。",
                         "maxLength": 300
                       },
                       "basis": {
@@ -1919,7 +1919,7 @@
                     "properties": {
                       "raw": {
                         "type": "string",
-                        "description": "价格原文；未找到时为空。",
+                        "description": "价格可见原文与条件；携程明确当前价时排除其他金额，完整卡片文字仍保留于记录 text。未找到时为空。",
                         "maxLength": 300
                       },
                       "basis": {

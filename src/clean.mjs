@@ -7,7 +7,7 @@ export function parsePrice(value) {
   if (matches.length !== 1 || /\d\s*[-~～至]\s*[¥￥]?\s*\d/.test(raw)) return unknown
   const amount = Number(matches[0][1].replace(/,/g, ''))
   if (!(amount > 0 && amount < 1000000)) return unknown
-  const basis = /券后|会员|新客|登录享/.test(raw) ? 'conditional' : /起/.test(raw) ? 'starting' : /总价|合计/.test(raw) ? 'total' : /每晚|\/晚|晚均/.test(raw) ? 'per_night' : 'unknown'
+  const basis = /券|会员|新客|首单|首住|登录享/.test(raw) ? 'conditional' : /起/.test(raw) ? 'starting' : /总价|合计/.test(raw) ? 'total' : /每晚|\/晚|晚均/.test(raw) ? 'per_night' : 'unknown'
   return { raw, basis, amountMinor: Math.round(amount * 100), currency: 'CNY' }
 }
 export function cleanSnapshot(snapshot, source, tabId, collectedAt = Date.now()) {

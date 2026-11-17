@@ -11,8 +11,21 @@ export function captureDocument(config) {
     if (!title) continue
     const links = [...el.querySelectorAll('a[href]')]
     const link = links.find(a => /\/(?:explore|discovery\/item|travels|i\/|hotel)/i.test(a.getAttribute('href') || '')) || links[0]
+    let priceText = clean(first(el, config.priceSelectors)?.innerText, 300)
+    if (config.id === 'ctrip') {
+      const current = [...el.querySelectorAll('[aria-label^="Current price "]')].filter(visible)
+      const original = [...el.querySelectorAll('[aria-label^="Original price "]')].filter(visible)
+      if (current.length === 1) {
+        // Keep the explicit current amount plus visible qualification text.
+        // Other amounts (crossed-out prices and coupon savings) are not quotes.
+        const amount = current[0].getAttribute('aria-label').slice('Current price '.length)
+        const conditions = priceText.replace(/[¥￥]\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g, '')
+        priceText = clean(`${amount}\n${conditions}`, 300)
+      } else if (current.length > 1) priceText = clean(`价格待定（多个当前价）\n${priceText}`, 300)
+      else if (original.length) priceText = clean(`暂无报价（仅展示原价）\n${priceText}`, 300)
+    }
     blocks.push({ title: clean(title.innerText, 300), text: clean(el.innerText, 4000), url: link?.href || location.href,
-      priceText: clean(first(el, config.priceSelectors)?.innerText, 300), selector })
+      priceText, selector })
   }
   const article = first(document, ['.ctd_content', '.gs_article', '.travels-article', '.article-content', '#noteContainer .desc', '.note-content .desc', '.note-scroller .desc', '.vc_article'])
   const heading = first(document, ['.ctd_head h2', '.ctd_head h1', '#detail-title', '.note-content .title', 'article h1', 'h1'])
@@ -25,4 +38,4 @@ export function captureDocument(config) {
       images: article ? [...article.querySelectorAll('img')].map(img => img.currentSrc || img.src).filter(src => /^https:\/\//.test(src)).slice(0, 12) : [] },
   }
 }
-export const captureExpression = source => `(${captureDocument.toString()})(${JSON.stringify({ selectors: source.selectors, titleSelectors: source.titleSelectors, priceSelectors: source.priceSelectors })})`
+export const captureExpression = source => `(${captureDocument.toString()})(${JSON.stringify({ id: source.id, selectors: source.selectors, titleSelectors: source.titleSelectors, priceSelectors: source.priceSelectors })})`

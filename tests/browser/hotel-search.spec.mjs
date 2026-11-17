@@ -8,13 +8,14 @@ const query = () => ({ city: '苏州', address: '苏州站', checkIn: day(1), ch
 
 // Deliberate synthetic site fixture with observed form attributes. It models
 // suggestion selection, query navigation and React-style trusted input events.
-function hotelFixture(url, { ambiguous = false, keywordOnly = false, blocked = false } = {}) {
+function hotelFixture(url, { ambiguous = false, keywordOnly = false, blocked = false, narrow = false, destinationAlias = false, splitHighlights = false, stagedNavigation = false } = {}) {
   const params = new URL(url).searchParams
-  const settings = { city: params.get('cityName') || '杭州', address: params.get('searchWord') || '',
-    checkIn: params.get('checkin'), checkOut: params.get('checkout'), ambiguous, keywordOnly }
+  const settings = { city: params.get('cityName') || params.get('destName') || '杭州', address: params.get('searchWord') || '',
+    checkIn: params.get('checkin'), checkOut: params.get('checkout'), ambiguous, keywordOnly, destinationAlias, splitHighlights, stagedNavigation }
   return `<!doctype html><meta charset="utf-8"><title>合成酒店查询页</title>
     <style>body{margin:20px}header{display:flex;gap:20px;align-items:center}section{position:relative}input{width:130px;height:35px}#suggestions{position:absolute;z-index:3;top:65px;left:0;background:white}#suggestions div{padding:12px;min-width:140px;border:1px solid #ccc;cursor:pointer}article{margin-top:30px}</style>
-    <header><section><label>目的地<input placeholder="目的地"></label><div id="suggestions"></div></section>
+    ${narrow ? '<style>header{flex-direction:column;align-items:stretch;width:400px}header>section{margin-bottom:35px}</style>' : ''}
+    <nav><button aria-label="搜索">全站搜索</button></nav><header><section><label>目的地<input placeholder="目的地"></label><div id="suggestions"></div></section>
     <section><label>位置<input placeholder="位置/品牌/酒店 (选填)"></label><div id="places"></div></section>
     <input id="checkInInput"><input id="checkOutInput"><button>1间, 2成人, 0儿童</button><button id="submit" aria-label="搜索">&#xe601;搜索</button></header>
     <div id="hotels"></div>${blocked ? '<p>请完成安全验证</p>' : ''}<script>
@@ -23,25 +24,33 @@ function hotelFixture(url, { ambiguous = false, keywordOnly = false, blocked = f
     city.value=settings.city;address.value=settings.address;
     document.querySelector('#checkInInput').value=settings.checkIn;document.querySelector('#checkOutInput').value=settings.checkOut;
     function suggest(input, container, isCity) {
+      let previous=input.value;
       container.style.cssText='position:absolute;z-index:3;top:65px;left:0;background:white';
       input.addEventListener('input',event=>{
         if (!event.isTrusted) return;
+        if (input.value===previous) return; previous=input.value;
         container.replaceChildren();
+        if (!input.value) return;
         if(!isCity&&settings.keywordOnly)return;
         for(let n=0;n<(isCity&&settings.ambiguous?2:1);n++){
           const option=document.createElement('div'); option.textContent=input.value;option.style.cssText='padding:12px;min-width:140px;border:1px solid #ccc;cursor:pointer';
           option.addEventListener('click',()=>{if(isCity)selectedCity=input.value;else selectedAddress=true;container.replaceChildren()});container.append(option);
+        }
+        if(settings.splitHighlights){
+          const other=document.createElement('div'),title=document.createElement('div'),highlight=document.createElement('span'),description=document.createElement('div'),subHighlight=document.createElement('span');
+          highlight.textContent=input.value;title.append(highlight,document.createTextNode('其他地标'));
+          subHighlight.textContent=input.value;description.append(document.createTextNode('中国-浙江-'),subHighlight);other.append(title,description);container.append(other);
         }
       });
     }
     suggest(city,document.querySelector('#suggestions'),true);suggest(address,document.querySelector('#places'),false);
     document.querySelector('#submit').addEventListener('click',()=>{
       const next=new URL('https://hotels.ctrip.com/hotels/list/');
-      next.searchParams.set('cityName',selectedCity);next.searchParams.set('cityId','14');
+      next.searchParams.set('cityName',settings.destinationAlias?'':selectedCity);next.searchParams.set('destName',selectedCity);next.searchParams.set('cityId','14');
       next.searchParams.set('checkin',settings.checkIn);next.searchParams.set('checkout',settings.checkOut);
       next.searchParams.set('curr','CNY');
       if(address.value){next.searchParams.set('searchWord',address.value);next.searchParams.set('searchType',selectedAddress?'T':'CT');if(selectedAddress)next.searchParams.set('optionId','123');else next.searchParams.set('directSearch','1')}
-      location.href=next.href;
+      if(settings.stagedNavigation){history.pushState({},'',next.href);setTimeout(()=>location.reload(),300)}else location.href=next.href;
     });
     if(settings.address) for(const [name,price] of [['站前酒店','￥299起'],['超预算酒店','￥499起'],['未知报价酒店','暂无报价'],['条件报价酒店','会员券后￥199']]){
       const article=document.createElement('article');article.className='hotel-card';
@@ -109,6 +118,23 @@ test('an unresolved address remains an explicit keyword query with no distance g
   const result = await host.call('search-hotels', query())
   expect(result.search.locationMode).toBe('keyword')
   expect(result.warnings).toContain('地址仅作为关键词查询，未完成坐标定位，不能保证附近半径或距离排序。')
+})
+
+test('a wrapped form resolves complete titles and waits for the destination document after history changes', async ({ context }) => {
+  const host = await runtime(context, { narrow: true, destinationAlias: true, splitHighlights: true, stagedNavigation: true })
+  const result = await host.call('search-hotels', query())
+  expect(result.search.conditionsVerified).toBe(true)
+  expect(result.search.locationMode).toBe('poi')
+  expect(result.search.guests).toContain('2成人')
+  expect(host.calls.at(-1)).toBe('release')
+})
+
+test('searching the already-selected city refreshes controlled input suggestions', async ({ context }) => {
+  const host = await runtime(context)
+  const result = await host.call('search-hotels', { ...query(), city: '杭州', address: '杭州东站' })
+  expect(result.search.city).toBe('杭州')
+  expect(result.search.address).toBe('杭州东站')
+  expect(host.calls).toContain('Input.dispatchKeyEvent')
 })
 
 test('ambiguous city suggestions do not silently pick a place or persist hotel results', async ({ context }) => {

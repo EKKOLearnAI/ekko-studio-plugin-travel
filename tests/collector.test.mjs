@@ -15,6 +15,8 @@ test('normalizes explicit amounts without confusing ranges, discounts or missing
   assert.deepEqual(parsePrice('￥1,299.50 每晚'), { raw: '￥1,299.50 每晚', basis: 'per_night', amountMinor: 129950, currency: 'CNY' })
   assert.equal(parsePrice('￥299起').basis, 'starting')
   assert.equal(parsePrice('会员券后￥299').basis, 'conditional')
+  assert.equal(parsePrice('折扣券￥299起').basis, 'conditional')
+  assert.equal(parsePrice('门店首单满减券￥156起').basis, 'conditional')
   assert.equal(parsePrice('合计￥598').basis, 'total')
   for (const text of ['', '暂无报价', '免费取消', '￥0', '￥199-299', '￥199 ￥299', '299积分', '￥12.345']) assert.equal(parsePrice(text).amountMinor, undefined, text)
 })
