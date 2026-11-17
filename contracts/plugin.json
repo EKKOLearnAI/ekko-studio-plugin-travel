@@ -1,0 +1,1290 @@
+{
+  "schemaVersion": 1,
+  "description": "旅行数据采集调试：固定站点脚本、清洗校验、MCP 与用户/Profile 隔离的最近结果。",
+  "models": {
+    "null": {
+      "type": "null",
+      "description": "无参数 RPC。"
+    },
+    "empty": {
+      "type": "object",
+      "description": "无参数工具或 RPC。",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source-list": {
+      "type": "object",
+      "description": "数据来源目录。",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "description": "支持或待验证的来源。",
+          "items": {
+            "type": "object",
+            "description": "来源信息。",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "来源标识。",
+                "enum": [
+                  "ctrip",
+                  "xiaohongshu",
+                  "meituan",
+                  "ctrip-guide",
+                  "mafengwo"
+                ]
+              },
+              "name": {
+                "type": "string",
+                "description": "来源名称。",
+                "maxLength": 100
+              },
+              "kind": {
+                "type": "string",
+                "description": "数据类型。",
+                "enum": [
+                  "hotel",
+                  "guide",
+                  "deal"
+                ]
+              },
+              "home": {
+                "type": "string",
+                "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "home"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "open-input": {
+      "type": "object",
+      "description": "打开来源页面；省略 url 使用该来源默认入口。",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "来源标识。",
+          "enum": [
+            "ctrip",
+            "xiaohongshu",
+            "meituan",
+            "ctrip-guide",
+            "mafengwo"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "description": "可选同来源 HTTPS 地址。",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "collect-input": {
+      "type": "object",
+      "description": "采集指定的已存在标签页，不接受自定义脚本。",
+      "properties": {
+        "tabId": {
+          "type": "string",
+          "description": "宿主返回的标签页 ID。",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "tabId"
+      ],
+      "additionalProperties": false
+    },
+    "tab": {
+      "type": "object",
+      "description": "支持的旅游站点标签页。",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "宿主标签页 ID。",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "title": {
+          "type": "string",
+          "description": "标签标题。",
+          "maxLength": 500
+        },
+        "url": {
+          "type": "string",
+          "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+          "maxLength": 4096
+        },
+        "source": {
+          "type": "string",
+          "description": "来源标识。",
+          "enum": [
+            "ctrip",
+            "xiaohongshu",
+            "meituan",
+            "ctrip-guide",
+            "mafengwo"
+          ]
+        },
+        "loading": {
+          "type": "boolean",
+          "description": "页面是否加载中。"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "url",
+        "source",
+        "loading"
+      ],
+      "additionalProperties": false
+    },
+    "tabs": {
+      "type": "object",
+      "description": "支持来源的标签页集合。",
+      "properties": {
+        "tabs": {
+          "type": "array",
+          "description": "已存在的标签页，过滤其他站点。",
+          "items": {
+            "type": "object",
+            "description": "支持的旅游站点标签页。",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "宿主标签页 ID。",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "description": "标签标题。",
+                "maxLength": 500
+              },
+              "url": {
+                "type": "string",
+                "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                "maxLength": 4096
+              },
+              "source": {
+                "type": "string",
+                "description": "来源标识。",
+                "enum": [
+                  "ctrip",
+                  "xiaohongshu",
+                  "meituan",
+                  "ctrip-guide",
+                  "mafengwo"
+                ]
+              },
+              "loading": {
+                "type": "boolean",
+                "description": "页面是否加载中。"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "url",
+              "source",
+              "loading"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "tabs"
+      ],
+      "additionalProperties": false
+    },
+    "page-snapshot": {
+      "type": "object",
+      "description": "浏览器返回给插件后端的受限 DOM 数据，不读取 Cookie、localStorage 或表单输入。",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "原始页面地址，在后端过滤敏感查询参数。",
+          "maxLength": 12000
+        },
+        "title": {
+          "type": "string",
+          "description": "页面标题。",
+          "maxLength": 500
+        },
+        "readyState": {
+          "type": "string",
+          "description": "加载状态。",
+          "enum": [
+            "loading",
+            "interactive",
+            "complete"
+          ]
+        },
+        "bodyText": {
+          "type": "string",
+          "description": "有限页面文本，用于识别登录、验证和拒绝访问。",
+          "maxLength": 24000
+        },
+        "blocks": {
+          "type": "array",
+          "description": "可见卡片。",
+          "items": {
+            "type": "object",
+            "description": "固定 DOM 选择器匹配到的卡片。",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "标题。",
+                "maxLength": 300
+              },
+              "text": {
+                "type": "string",
+                "description": "卡片可见文字。",
+                "maxLength": 4000
+              },
+              "url": {
+                "type": "string",
+                "description": "卡片原始导航地址，仅在后端清洗。",
+                "maxLength": 12000
+              },
+              "priceText": {
+                "type": "string",
+                "description": "价格元素原文。",
+                "maxLength": 300
+              },
+              "selector": {
+                "type": "string",
+                "description": "命中的固定选择器。",
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "title",
+              "text",
+              "url",
+              "priceText",
+              "selector"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 40
+        },
+        "links": {
+          "type": "array",
+          "description": "已识别的正文链接。",
+          "items": {
+            "type": "object",
+            "description": "原文链接。",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "链接标题。",
+                "maxLength": 300
+              },
+              "url": {
+                "type": "string",
+                "description": "页面原始链接，仅在后端清洗。",
+                "maxLength": 12000
+              }
+            },
+            "required": [
+              "title",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 60
+        },
+        "article": {
+          "type": "object",
+          "description": "固定正文选择器读取的内容。",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "正文标题。",
+              "maxLength": 300
+            },
+            "text": {
+              "type": "string",
+              "description": "正文文字。",
+              "maxLength": 20000
+            },
+            "images": {
+              "type": "array",
+              "description": "正文图像原始地址。",
+              "items": {
+                "type": "string",
+                "description": "原始图像 URL。",
+                "maxLength": 12000
+              },
+              "maxItems": 12
+            }
+          },
+          "required": [
+            "title",
+            "text",
+            "images"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "url",
+        "title",
+        "readyState",
+        "bodyText",
+        "blocks",
+        "links",
+        "article"
+      ],
+      "additionalProperties": false
+    },
+    "collection": {
+      "type": "object",
+      "description": "一次固定脚本采集的结果，状态和记录完整校验。",
+      "properties": {
+        "schemaVersion": {
+          "type": "integer",
+          "description": "结果结构版本。",
+          "enum": [
+            1
+          ]
+        },
+        "source": {
+          "type": "string",
+          "description": "来源标识。",
+          "enum": [
+            "ctrip",
+            "xiaohongshu",
+            "meituan",
+            "ctrip-guide",
+            "mafengwo"
+          ]
+        },
+        "tabId": {
+          "type": "string",
+          "description": "此次采集的宿主标签页 ID。",
+          "maxLength": 200
+        },
+        "url": {
+          "type": "string",
+          "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+          "maxLength": 4096
+        },
+        "pageTitle": {
+          "type": "string",
+          "description": "页面标题。",
+          "maxLength": 500
+        },
+        "collectedAt": {
+          "type": "integer",
+          "description": "采集时间，Unix 毫秒。",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "description": "ok 正文；partial 不完整信息；其他状态明确说明未取到数据的原因。",
+          "enum": [
+            "ok",
+            "partial",
+            "login_required",
+            "verification_required",
+            "blocked",
+            "loading",
+            "empty",
+            "layout_changed"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "可读的状态说明。",
+          "maxLength": 1000
+        },
+        "records": {
+          "type": "array",
+          "description": "有效数据；失败时为空。",
+          "items": {
+            "type": "object",
+            "description": "清洗后的旅游记录，不包含推断的实时房态、日期或套餐条件。",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "description": "hotel 酒店卡片；deal 团购卡片；guide 完整正文；guide_link 列表摘要。",
+                "enum": [
+                  "hotel",
+                  "deal",
+                  "guide",
+                  "guide_link"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "description": "标题或酒店名称。",
+                "maxLength": 300
+              },
+              "url": {
+                "type": "string",
+                "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                "maxLength": 4096
+              },
+              "text": {
+                "type": "string",
+                "description": "正文或卡片摘要；列表链接可为空。",
+                "maxLength": 20000
+              },
+              "images": {
+                "type": "array",
+                "description": "正文中的图片 URL；尚未执行 OCR。",
+                "items": {
+                  "type": "string",
+                  "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                  "maxLength": 4096
+                },
+                "maxItems": 12
+              },
+              "price": {
+                "type": "object",
+                "description": "页面价格原文与可确定的金额。未知金额省略 amountMinor/currency。",
+                "properties": {
+                  "raw": {
+                    "type": "string",
+                    "description": "价格原文；未找到时为空。",
+                    "maxLength": 300
+                  },
+                  "basis": {
+                    "type": "string",
+                    "description": "starting 起价；conditional 条件价；total 总价；per_night 每晚价；unknown 未知口径。",
+                    "enum": [
+                      "unknown",
+                      "starting",
+                      "conditional",
+                      "total",
+                      "per_night"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "integer",
+                    "description": "人民币分，必须是明确的单一正金额。",
+                    "minimum": 1,
+                    "maximum": 100000000
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "币种，只解析明确人民币符号。",
+                    "enum": [
+                      "CNY"
+                    ]
+                  }
+                },
+                "required": [
+                  "raw",
+                  "basis"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "kind",
+              "title",
+              "url",
+              "text",
+              "images",
+              "price"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 40
+        },
+        "warnings": {
+          "type": "array",
+          "description": "信息缺失和使用边界。",
+          "items": {
+            "type": "string",
+            "description": "单条说明。",
+            "maxLength": 1000
+          },
+          "maxItems": 20
+        },
+        "diagnostics": {
+          "type": "object",
+          "description": "用于本地核对的有限诊断，不写入公开仓库。",
+          "properties": {
+            "readyState": {
+              "type": "string",
+              "description": "浏览器加载状态。",
+              "enum": [
+                "loading",
+                "interactive",
+                "complete"
+              ]
+            },
+            "matchedBlocks": {
+              "type": "integer",
+              "description": "匹配到的卡片数。",
+              "minimum": 0
+            },
+            "matchedLinks": {
+              "type": "integer",
+              "description": "匹配到的原文链接数。",
+              "minimum": 0
+            },
+            "articleCharacters": {
+              "type": "integer",
+              "description": "读取到的正文字符数。",
+              "minimum": 0
+            },
+            "excerpt": {
+              "type": "string",
+              "description": "可见页面文本的有限片段，非表单输入。",
+              "maxLength": 1600
+            }
+          },
+          "required": [
+            "readyState",
+            "matchedBlocks",
+            "matchedLinks",
+            "articleCharacters",
+            "excerpt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "source",
+        "tabId",
+        "url",
+        "pageTitle",
+        "collectedAt",
+        "status",
+        "message",
+        "records",
+        "warnings",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "last-result": {
+      "type": "object",
+      "description": "当前用户及 Profile 最近一次结果。",
+      "properties": {
+        "present": {
+          "type": "boolean",
+          "description": "是否存在已保存结果。"
+        },
+        "result": {
+          "type": "object",
+          "description": "一次固定脚本采集的结果，状态和记录完整校验。",
+          "properties": {
+            "schemaVersion": {
+              "type": "integer",
+              "description": "结果结构版本。",
+              "enum": [
+                1
+              ]
+            },
+            "source": {
+              "type": "string",
+              "description": "来源标识。",
+              "enum": [
+                "ctrip",
+                "xiaohongshu",
+                "meituan",
+                "ctrip-guide",
+                "mafengwo"
+              ]
+            },
+            "tabId": {
+              "type": "string",
+              "description": "此次采集的宿主标签页 ID。",
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+              "maxLength": 4096
+            },
+            "pageTitle": {
+              "type": "string",
+              "description": "页面标题。",
+              "maxLength": 500
+            },
+            "collectedAt": {
+              "type": "integer",
+              "description": "采集时间，Unix 毫秒。",
+              "minimum": 0
+            },
+            "status": {
+              "type": "string",
+              "description": "ok 正文；partial 不完整信息；其他状态明确说明未取到数据的原因。",
+              "enum": [
+                "ok",
+                "partial",
+                "login_required",
+                "verification_required",
+                "blocked",
+                "loading",
+                "empty",
+                "layout_changed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "可读的状态说明。",
+              "maxLength": 1000
+            },
+            "records": {
+              "type": "array",
+              "description": "有效数据；失败时为空。",
+              "items": {
+                "type": "object",
+                "description": "清洗后的旅游记录，不包含推断的实时房态、日期或套餐条件。",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "description": "hotel 酒店卡片；deal 团购卡片；guide 完整正文；guide_link 列表摘要。",
+                    "enum": [
+                      "hotel",
+                      "deal",
+                      "guide",
+                      "guide_link"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题或酒店名称。",
+                    "maxLength": 300
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                    "maxLength": 4096
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "正文或卡片摘要；列表链接可为空。",
+                    "maxLength": 20000
+                  },
+                  "images": {
+                    "type": "array",
+                    "description": "正文中的图片 URL；尚未执行 OCR。",
+                    "items": {
+                      "type": "string",
+                      "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                      "maxLength": 4096
+                    },
+                    "maxItems": 12
+                  },
+                  "price": {
+                    "type": "object",
+                    "description": "页面价格原文与可确定的金额。未知金额省略 amountMinor/currency。",
+                    "properties": {
+                      "raw": {
+                        "type": "string",
+                        "description": "价格原文；未找到时为空。",
+                        "maxLength": 300
+                      },
+                      "basis": {
+                        "type": "string",
+                        "description": "starting 起价；conditional 条件价；total 总价；per_night 每晚价；unknown 未知口径。",
+                        "enum": [
+                          "unknown",
+                          "starting",
+                          "conditional",
+                          "total",
+                          "per_night"
+                        ]
+                      },
+                      "amountMinor": {
+                        "type": "integer",
+                        "description": "人民币分，必须是明确的单一正金额。",
+                        "minimum": 1,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "type": "string",
+                        "description": "币种，只解析明确人民币符号。",
+                        "enum": [
+                          "CNY"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "raw",
+                      "basis"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "title",
+                  "url",
+                  "text",
+                  "images",
+                  "price"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 40
+            },
+            "warnings": {
+              "type": "array",
+              "description": "信息缺失和使用边界。",
+              "items": {
+                "type": "string",
+                "description": "单条说明。",
+                "maxLength": 1000
+              },
+              "maxItems": 20
+            },
+            "diagnostics": {
+              "type": "object",
+              "description": "用于本地核对的有限诊断，不写入公开仓库。",
+              "properties": {
+                "readyState": {
+                  "type": "string",
+                  "description": "浏览器加载状态。",
+                  "enum": [
+                    "loading",
+                    "interactive",
+                    "complete"
+                  ]
+                },
+                "matchedBlocks": {
+                  "type": "integer",
+                  "description": "匹配到的卡片数。",
+                  "minimum": 0
+                },
+                "matchedLinks": {
+                  "type": "integer",
+                  "description": "匹配到的原文链接数。",
+                  "minimum": 0
+                },
+                "articleCharacters": {
+                  "type": "integer",
+                  "description": "读取到的正文字符数。",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "可见页面文本的有限片段，非表单输入。",
+                  "maxLength": 1600
+                }
+              },
+              "required": [
+                "readyState",
+                "matchedBlocks",
+                "matchedLinks",
+                "articleCharacters",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "source",
+            "tabId",
+            "url",
+            "pageTitle",
+            "collectedAt",
+            "status",
+            "message",
+            "records",
+            "warnings",
+            "diagnostics"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "present"
+      ],
+      "additionalProperties": false
+    },
+    "tool-tabs": {
+      "type": "object",
+      "description": "列表工具回传。",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "业务是否获得可用结果。"
+        },
+        "content": {
+          "type": "string",
+          "description": "状态说明。",
+          "maxLength": 2000
+        },
+        "data": {
+          "type": "object",
+          "description": "支持来源的标签页集合。",
+          "properties": {
+            "tabs": {
+              "type": "array",
+              "description": "已存在的标签页，过滤其他站点。",
+              "items": {
+                "type": "object",
+                "description": "支持的旅游站点标签页。",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "宿主标签页 ID。",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标签标题。",
+                    "maxLength": 500
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                    "maxLength": 4096
+                  },
+                  "source": {
+                    "type": "string",
+                    "description": "来源标识。",
+                    "enum": [
+                      "ctrip",
+                      "xiaohongshu",
+                      "meituan",
+                      "ctrip-guide",
+                      "mafengwo"
+                    ]
+                  },
+                  "loading": {
+                    "type": "boolean",
+                    "description": "页面是否加载中。"
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "url",
+                  "source",
+                  "loading"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "tabs"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "string",
+          "description": "工具错误说明。",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "ok",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "tool-open": {
+      "type": "object",
+      "description": "打开页面工具回传。",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "业务是否获得可用结果。"
+        },
+        "content": {
+          "type": "string",
+          "description": "状态说明。",
+          "maxLength": 2000
+        },
+        "data": {
+          "type": "object",
+          "description": "支持的旅游站点标签页。",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "宿主标签页 ID。",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "title": {
+              "type": "string",
+              "description": "标签标题。",
+              "maxLength": 500
+            },
+            "url": {
+              "type": "string",
+              "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+              "maxLength": 4096
+            },
+            "source": {
+              "type": "string",
+              "description": "来源标识。",
+              "enum": [
+                "ctrip",
+                "xiaohongshu",
+                "meituan",
+                "ctrip-guide",
+                "mafengwo"
+              ]
+            },
+            "loading": {
+              "type": "boolean",
+              "description": "页面是否加载中。"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "url",
+            "source",
+            "loading"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "string",
+          "description": "工具错误说明。",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "ok",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "tool-collection": {
+      "type": "object",
+      "description": "采集工具回传。",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "业务是否获得可用结果。"
+        },
+        "content": {
+          "type": "string",
+          "description": "状态说明。",
+          "maxLength": 2000
+        },
+        "data": {
+          "type": "object",
+          "description": "一次固定脚本采集的结果，状态和记录完整校验。",
+          "properties": {
+            "schemaVersion": {
+              "type": "integer",
+              "description": "结果结构版本。",
+              "enum": [
+                1
+              ]
+            },
+            "source": {
+              "type": "string",
+              "description": "来源标识。",
+              "enum": [
+                "ctrip",
+                "xiaohongshu",
+                "meituan",
+                "ctrip-guide",
+                "mafengwo"
+              ]
+            },
+            "tabId": {
+              "type": "string",
+              "description": "此次采集的宿主标签页 ID。",
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+              "maxLength": 4096
+            },
+            "pageTitle": {
+              "type": "string",
+              "description": "页面标题。",
+              "maxLength": 500
+            },
+            "collectedAt": {
+              "type": "integer",
+              "description": "采集时间，Unix 毫秒。",
+              "minimum": 0
+            },
+            "status": {
+              "type": "string",
+              "description": "ok 正文；partial 不完整信息；其他状态明确说明未取到数据的原因。",
+              "enum": [
+                "ok",
+                "partial",
+                "login_required",
+                "verification_required",
+                "blocked",
+                "loading",
+                "empty",
+                "layout_changed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "可读的状态说明。",
+              "maxLength": 1000
+            },
+            "records": {
+              "type": "array",
+              "description": "有效数据；失败时为空。",
+              "items": {
+                "type": "object",
+                "description": "清洗后的旅游记录，不包含推断的实时房态、日期或套餐条件。",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "description": "hotel 酒店卡片；deal 团购卡片；guide 完整正文；guide_link 列表摘要。",
+                    "enum": [
+                      "hotel",
+                      "deal",
+                      "guide",
+                      "guide_link"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题或酒店名称。",
+                    "maxLength": 300
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                    "maxLength": 4096
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "正文或卡片摘要；列表链接可为空。",
+                    "maxLength": 20000
+                  },
+                  "images": {
+                    "type": "array",
+                    "description": "正文中的图片 URL；尚未执行 OCR。",
+                    "items": {
+                      "type": "string",
+                      "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                      "maxLength": 4096
+                    },
+                    "maxItems": 12
+                  },
+                  "price": {
+                    "type": "object",
+                    "description": "页面价格原文与可确定的金额。未知金额省略 amountMinor/currency。",
+                    "properties": {
+                      "raw": {
+                        "type": "string",
+                        "description": "价格原文；未找到时为空。",
+                        "maxLength": 300
+                      },
+                      "basis": {
+                        "type": "string",
+                        "description": "starting 起价；conditional 条件价；total 总价；per_night 每晚价；unknown 未知口径。",
+                        "enum": [
+                          "unknown",
+                          "starting",
+                          "conditional",
+                          "total",
+                          "per_night"
+                        ]
+                      },
+                      "amountMinor": {
+                        "type": "integer",
+                        "description": "人民币分，必须是明确的单一正金额。",
+                        "minimum": 1,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "type": "string",
+                        "description": "币种，只解析明确人民币符号。",
+                        "enum": [
+                          "CNY"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "raw",
+                      "basis"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "title",
+                  "url",
+                  "text",
+                  "images",
+                  "price"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 40
+            },
+            "warnings": {
+              "type": "array",
+              "description": "信息缺失和使用边界。",
+              "items": {
+                "type": "string",
+                "description": "单条说明。",
+                "maxLength": 1000
+              },
+              "maxItems": 20
+            },
+            "diagnostics": {
+              "type": "object",
+              "description": "用于本地核对的有限诊断，不写入公开仓库。",
+              "properties": {
+                "readyState": {
+                  "type": "string",
+                  "description": "浏览器加载状态。",
+                  "enum": [
+                    "loading",
+                    "interactive",
+                    "complete"
+                  ]
+                },
+                "matchedBlocks": {
+                  "type": "integer",
+                  "description": "匹配到的卡片数。",
+                  "minimum": 0
+                },
+                "matchedLinks": {
+                  "type": "integer",
+                  "description": "匹配到的原文链接数。",
+                  "minimum": 0
+                },
+                "articleCharacters": {
+                  "type": "integer",
+                  "description": "读取到的正文字符数。",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "可见页面文本的有限片段，非表单输入。",
+                  "maxLength": 1600
+                }
+              },
+              "required": [
+                "readyState",
+                "matchedBlocks",
+                "matchedLinks",
+                "articleCharacters",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "source",
+            "tabId",
+            "url",
+            "pageTitle",
+            "collectedAt",
+            "status",
+            "message",
+            "records",
+            "warnings",
+            "diagnostics"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "string",
+          "description": "工具错误说明。",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "ok",
+        "content"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "rpc": {
+    "list-sources": {
+      "description": "列出来源。",
+      "input": "null",
+      "output": "source-list"
+    },
+    "list-tabs": {
+      "description": "列出支持的现有标签页。",
+      "input": "empty",
+      "output": "tabs"
+    },
+    "open-page": {
+      "description": "在内置浏览器创建来源页面。",
+      "input": "open-input",
+      "output": "tab"
+    },
+    "collect-page": {
+      "description": "固定脚本采集并保存当前用户/Profile 最近结果。",
+      "input": "collect-input",
+      "output": "collection"
+    },
+    "last-result": {
+      "description": "读取当前用户/Profile 最近结果。",
+      "input": "null",
+      "output": "last-result"
+    }
+  },
+  "tools": {
+    "list_pages": {
+      "description": "列出旅游页面。",
+      "input": "empty",
+      "output": "tool-tabs"
+    },
+    "open_page": {
+      "description": "创建旅游页面。",
+      "input": "open-input",
+      "output": "tool-open"
+    },
+    "collect_page": {
+      "description": "采集旅游页面并保存最近结果。",
+      "input": "collect-input",
+      "output": "tool-collection"
+    }
+  },
+  "commands": {},
+  "actions": {},
+  "events": {},
+  "checkpoints": {},
+  "storage": {
+    "last-collection-v1": {
+      "description": "当前调用者 Profile 下最近一次结果；不保存登录凭证。",
+      "model": "collection",
+      "version": 1,
+      "scope": "run.state.profile"
+    }
+  }
+}

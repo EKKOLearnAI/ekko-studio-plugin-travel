@@ -1,0 +1,27 @@
+{
+  "name": "ekko-studio-plugin-travel",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "ekko-studio plugins dev .",
+    "harness:check": "node scripts/plugin-harness.mjs check",
+    "test": "node --test tests/*.test.mjs",
+    "prepack": "npm run harness:check && npm test && npm run build --if-present && npm run harness:check",
+    "check": "npm run harness:check && npm test",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@ekko-studio/plugin-sdk": "file:./sdk",
+    "@playwright/test": "1.60.0"
+  },
+  "description": "用 Studio 内置浏览器运行固定站点脚本，采集并清洗酒店展示报价与图文攻略，向 AI 提供结构化 MCP 工具。当前是采集调试版。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EKKOLearnAI/ekko-studio-plugin-travel.git"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

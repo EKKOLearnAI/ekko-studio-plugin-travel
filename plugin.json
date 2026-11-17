@@ -1,0 +1,46 @@
+{
+  "id": "travel",
+  "name": "旅行助手 · 采集调试",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "description": "用 Studio 内置浏览器运行固定站点脚本，采集并清洗酒店展示报价与图文攻略，向 AI 提供结构化 MCP 工具。当前是采集调试版。",
+  "author": {
+    "name": "EKKOLearnAI"
+  },
+  "repository": "https://github.com/EKKOLearnAI/ekko-studio-plugin-travel",
+  "license": "MIT",
+  "keywords": [
+    "travel",
+    "旅游",
+    "采集",
+    "mcp"
+  ],
+  "server": "server.mjs",
+  "client": "client.mjs",
+  "permissions": [
+    "ui",
+    "tools",
+    "browser.cdp"
+  ],
+  "mcp": {
+    "name": "travel"
+  },
+  "views": [
+    {
+      "id": "collector",
+      "title": "旅行数据采集",
+      "slot": "page",
+      "icon": "book"
+    }
+  ],
+  "navigation": {
+    "main": [
+      {
+        "viewId": "collector",
+        "title": "旅行助手",
+        "icon": "book",
+        "order": 50
+      }
+    ]
+  }
+}
