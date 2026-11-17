@@ -1069,8 +1069,8 @@
         },
         "content": {
           "type": "string",
-          "description": "状态说明。",
-          "maxLength": 2000
+          "description": "MCP 返回的可解析 JSON 结果文本，与 data 一致；异常时直接包含具体错误原因。",
+          "maxLength": 1048576
         },
         "data": {
           "type": "object",
@@ -1154,8 +1154,8 @@
         },
         "content": {
           "type": "string",
-          "description": "状态说明。",
-          "maxLength": 2000
+          "description": "MCP 返回的可解析 JSON 结果文本，与 data 一致；异常时直接包含具体错误原因。",
+          "maxLength": 1048576
         },
         "data": {
           "type": "object",
@@ -1224,8 +1224,8 @@
         },
         "content": {
           "type": "string",
-          "description": "状态说明。",
-          "maxLength": 2000
+          "description": "MCP 返回的可解析 JSON 结果文本，与 data 一致；异常时直接包含具体错误原因。",
+          "maxLength": 1048576
         },
         "data": {
           "type": "object",
@@ -1807,8 +1807,8 @@
         },
         "content": {
           "type": "string",
-          "description": "状态说明。",
-          "maxLength": 2000
+          "description": "MCP 返回的可解析 JSON 结果文本，与 data 一致；异常时直接包含具体错误原因。",
+          "maxLength": 1048576
         },
         "data": {
           "type": "object",

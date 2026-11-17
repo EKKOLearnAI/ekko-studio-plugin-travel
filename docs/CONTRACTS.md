@@ -13,7 +13,7 @@
 | `collect-page` | `{tabId}` | 附加 CDP，执行固定 DOM 脚本，校验、清洗并存储最后一次结果；始终尝试释放租约 |
 | `last-result` | `null` | 返回 `{present:false}` 或 `{present:true,result}` |
 
-MCP 工具 `search_hotels`、`list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`，采集状态为 `ok` 或 `partial` 才认为调用成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
+MCP 工具 `search_hotels`、`list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`；成功及页面状态结果的 content 为 data 的 JSON 文本，确保受管 MCP 优先回传 content 时模型仍收到完整结构。异常时 content 和 error 都包含具体原因。采集状态为 `ok` 或 `partial` 才认为调用成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
 
 没有任意 JavaScript 输入、外部抓取服务、Shell、MCP 子进程或浏览器令牌配置。只能操作内置浏览器中的支持来源；CDP 权限由宿主控制。取消信号在调用前、执行采集脚本前及持久化前检查；宿主正在执行的 CDP 请求仍受其超时和租约规则约束。
 
@@ -54,4 +54,4 @@ maxPrice 为可选人民币元上限，仅在本批已采集记录中筛选明�
 
 只使用可信运行上下文的 `run.state.profile`，由宿主按真实用户及 Profile 隔离，不接受调用方传入分区身份。键为 `last-collection-v1`，版本为 1，存储已校验的 `collection`。无记录返回 `present:false`；读取到非法记录时抛出错误，不自动覆盖或猜测默认值。
 
-采集结果包含 `schemaVersion:1`；v0.2 为 collection 添加可选 search，不改变已有字段含义；v0.1 记录无该字段仍可读，无需迁移。v0.2.1 完善表单适配、导航等待和当前价识别，不改变字段类型；历史歧义价格不会自动猜测补全，重新采集可获得新结果。后续不兼容变更须升级版本、实现迁移并补充说明与测试。脚手架 greeting/settings 示例未在本插件发布，不做兼容。
+采集结果包含 `schemaVersion:1`；v0.2 为 collection 添加可选 search，不改变已有字段含义；v0.1 记录无该字段仍可读，无需迁移。v0.2.1 完善表单适配、导航等待和当前价识别，不改变字段类型；历史歧义价格不会自动猜测补全，重新采集可获得新结果。v0.2.2 将工具 content 改为 data 的 JSON 文本并扩大文本限制，持久化 collection 不变；MCP 消费方可以直接解析记录，异常文本包含具体原因。后续不兼容变更须升级版本、实现迁移并补充说明与测试。脚手架 greeting/settings 示例未在本插件发布，不做兼容。

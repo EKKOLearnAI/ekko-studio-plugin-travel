@@ -1,7 +1,7 @@
 {
   "id": "travel",
   "name": "旅行助手 · 采集调试",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "apiVersion": 1,
   "description": "通过 Studio 内置浏览器按城市、地址或地标查询酒店、核对日期并筛选本批展示价，同时采集和清洗图文攻略，提供结构化 MCP 工具。当前是查询调试版。",
   "author": {

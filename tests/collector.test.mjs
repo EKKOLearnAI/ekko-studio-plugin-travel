@@ -92,9 +92,28 @@ test('tools return explicit failures for blocked pages and aborted calls', async
   const tool = tools.get('collect_page')
   const result = await tool.execute({ tabId: 'tab-1' }, context())
   assert.equal(result.ok, false); assert.equal(result.data.status, 'blocked')
+  assert.deepEqual(JSON.parse(result.content), result.data)
   const abort = new AbortController(); abort.abort()
   const cancelled = await tool.execute({ tabId: 'tab-1' }, context(1, 'default', abort.signal))
   assert.equal(cancelled.ok, false); assert.ok(cancelled.error)
+  assert.equal(cancelled.content, cancelled.error)
+})
+
+test('MCP content contains the same structured hotel records as data', async () => {
+  const { tools, context } = setup()
+  const result = await tools.get('collect_page').execute({ tabId: 'tab-1' }, context())
+  assert.equal(result.ok, true)
+  assert.deepEqual(JSON.parse(result.content), result.data)
+  assert.equal(JSON.parse(result.content).records[0].price.amountMinor, 29900)
+})
+
+test('MCP guide content remains valid JSON beyond the old summary length limit', async () => {
+  const text = '路线说明。'.repeat(600)
+  const { tools, context } = setup(snapshot({ url: 'https://www.xiaohongshu.com/explore/example', article: { title: '样例攻略', text, images: [] } }))
+  const result = await tools.get('collect_page').execute({ tabId: 'tab-1' }, context())
+  assert.equal(result.ok, true)
+  assert.ok(result.content.length > 2000)
+  assert.equal(JSON.parse(result.content).records[0].text, text)
 })
 
 test('Ctrip accessibility adapter selects one current price and never substitutes an original price', () => {
