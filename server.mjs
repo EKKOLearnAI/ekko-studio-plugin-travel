@@ -34,7 +34,7 @@ export function apply(ctx) {
           validateModel(contract, definition.input, input)
           const data = await methods[rpcName](input, run)
           return validateModel(contract, definition.output, { ok: !data.status || ['ok', 'partial'].includes(data.status), content: data.message || '操作已完成。', data })
-        } catch (error) { return { ok: false, content: '采集工具执行失败', error: String(error.message || error).slice(0, 1000) } }
+        } catch (error) { return validateModel(contract, definition.output, { ok: false, content: '采集工具执行失败', error: String(error?.message || error).slice(0, 1000) }) }
       },
     })
   }

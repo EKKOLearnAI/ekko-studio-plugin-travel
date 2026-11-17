@@ -23,7 +23,7 @@ Studio 内置浏览器 → 浏览器 SDK / CDP → 站点脚本 → 契约校验
 
 ## 安装与调试
 
-需要 Node.js 22+、支持插件浏览器 SDK 的 Ekko Studio Desktop，以及启用本地浏览器连接的宿主版本。Web UI 与 Desktop 必须同时包含该修复；只更新插件不能修复旧 Desktop 的接入限制。
+需要 Node.js 22+、支持插件浏览器 SDK 的 Ekko Studio Desktop，以及启用本地浏览器连接的宿主版本（[Studio 修复 PR #3843](https://github.com/EKKOLearnAI/ekko-studio/pull/3843)）。Web UI 与 Desktop 必须同时包含该修复；只更新插件不能修复旧 Desktop 的接入限制。
 
 ```bash
 git clone https://github.com/EKKOLearnAI/ekko-studio-plugin-travel.git

@@ -14,8 +14,8 @@ SDK and retain the upstream Business Source License 1.1, reproduced in
 
 Upstream: https://github.com/EKKOLearnAI/ekko-studio
 
-Browser connection guidance includes the local Desktop relay fix in branch
-`codex/fix-plugin-local-browser-20261117`. Bundled SDK types do not alter host
+Browser connection guidance includes the local Desktop relay fix from upstream
+commit `fe6b1b388f7d0be979aa639be85064277e038220` (PR #3843). Bundled SDK types do not alter host
 permissions or provide the host fix themselves.
 
 The upstream BSL-1.1 use grant and change date apply to these bundled materials;
