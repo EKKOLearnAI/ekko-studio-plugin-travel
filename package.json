@@ -1,6 +1,6 @@
 {
   "name": "ekko-studio-plugin-travel",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "@ekko-studio/plugin-sdk": "file:./sdk",
     "@playwright/test": "1.60.0"
   },
-  "description": "通过 Studio 内置浏览器按城市、地址或地标查询酒店、核对日期并筛选本批展示价，同时采集和清洗图文攻略，提供结构化 MCP 工具。当前是查询调试版。",
+  "description": "通过 Studio 内置浏览器查询酒店、动车和国内单程机票，固定脚本核对条件并清洗报价、余票及图文攻略，提供结构化 MCP 工具。",
   "license": "MIT",
   "repository": {
     "type": "git",

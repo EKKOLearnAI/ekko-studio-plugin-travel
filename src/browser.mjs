@@ -21,6 +21,7 @@ export async function collectPage(input, run, contract, browser = run.host.brows
   if (!tab) throw new Error('标签页不存在，请刷新标签页列表')
   const source = sourceForUrl(tab.url)
   if (!source) throw new Error('只能采集支持的旅游站点')
+  if (['train', 'flight'].includes(source.kind)) throw new Error('交通页面请使用 search_trains / search_flights，提供出发地、目的地和日期后查询')
   await browser.cdp.attach(tab.id)
   try {
     return await collectAttachedPage(tab, source, run, contract, browser)

@@ -7,13 +7,16 @@
 | RPC | 输入 | 行为 |
 | --- | --- | --- |
 | `search-hotels` | `{city,address,checkIn,checkOut,maxPrice?}` | 固定脚本选城市、提交地址、核对条件后采集并保存；失败不覆盖最近结果 |
+| `search-trains` | `{from,to,departureDate,highSpeedOnly?,limit?}` | 按单程和日期查询，默认 G/D/C，核对实际站点条件并分别清洗席别价格/余票 |
+| `search-flights` | `{from,to,departureDate,directOnly?,cabin?,limit?}` | 国内单程 1 成人，默认经济舱直飞；站点选择城市全部机场 |
+| `last-transport` | `null` | 当前用户/Profile 最近成功交通结果，结构与酒店攻略独立 |
 | `list-sources` | `null` | 返回来源目录，不读取用户浏览器 |
 | `list-tabs` | `{}` | 列出支持来源的标签页，不采集页面 |
 | `open-page` | `{source, url?}` | 校验 HTTPS 来源后新建页面；省略 URL 使用来源首页 |
 | `collect-page` | `{tabId}` | 附加 CDP，执行固定 DOM 脚本，校验、清洗并存储最后一次结果；始终尝试释放租约 |
 | `last-result` | `null` | 返回 `{present:false}` 或 `{present:true,result}` |
 
-MCP 工具 `search_hotels`、`list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`；成功及页面状态结果的 content 为 data 的 JSON 文本，确保受管 MCP 优先回传 content 时模型仍收到完整结构。异常时 content 和 error 都包含具体原因。采集状态为 `ok` 或 `partial` 才认为调用成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
+MCP 工具 `search_trains`、`search_flights`、`search_hotels`、`list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`；成功及页面状态结果的 content 为 data 的 JSON 文本，确保受管 MCP 优先回传 content 时模型仍收到完整结构。异常时 content 和 error 都包含具体原因。采集状态为 `ok` 或 `partial` 认为调用成功；交通查询已核实条件且筛选无匹配时 `empty` 也为成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
 
 没有任意 JavaScript 输入、外部抓取服务、Shell、MCP 子进程或浏览器令牌配置。只能操作内置浏览器中的支持来源；CDP 权限由宿主控制。取消信号在调用前、执行采集脚本前及持久化前检查；宿主正在执行的 CDP 请求仍受其超时和租约规则约束。
 
@@ -27,6 +30,30 @@ MCP 工具 `search_hotels`、`list_pages`、`open_page`、`collect_page` 复用�
 
 maxPrice 为可选人民币元上限，仅在本批已采集记录中筛选明示起价或每晚价格。高于上限的记录排除并计入 budgetExcluded；条件价、总价、缺价和口径未知的记录保留并计入 budgetUnverified，UI 明示预算待核实。不能把筛选后零条记录解释成全站无房或该地点无酒店。
 
+## 交通查询与字段
+
+`train-query` 必填 `from/to/departureDate`，可选 `highSpeedOnly`（默认 true，仅 G/D/C）和 `limit`（默认 20，1–50）。`flight-query` 共享必填字段，另有 `directOnly`（默认 true）、`cabin`（默认 economy，或 all）和 limit。日期有效且不早于北京时间今天，本版最多未来一年；实际预售范围由站点决定，不推断有售。
+
+列车使用实际网页接受的中文城市/站名查询参数，核对 URL、页面输入及结果日期标题。机票先通过可见城市联想项选择完整城市（所有机场），从已选输入取得三字代码，避免把机场子项当城市；明确单程 1 成人、0 儿童、0 婴儿及日期/舱等，随后核对结果页。以最多 50 个现有卡片的有界滚动触发航班号懒加载，不点击订票/展开运价；未明确航班号的卡片不冒充有效记录。等待及滚动有界，响应取消并始终尝试释放租约，保留查询标签页供检查。
+
+`transport-result` 字段：
+
+| 字段 | 含义 |
+| --- | --- |
+| mode/source/requested/observed | train 或 flight、携程来源、补齐默认值的输入、实际页面地点/日期/舱等 |
+| conditionsVerified | URL 与页面条件吻合，采集后再次核对；不符时丢弃数据或返回失败状态 |
+| loadedCount/matchedCount/truncated | 当前 DOM 卡片数、符合 G/D/C 或直飞筛选的数目、是否被 limit 截断；不代表全站总量 |
+| records[].serviceCodes/provider | 车次/航段航班号和提供方，代码共享不单凭代码个数当中转 |
+| departurePlace/arrivalPlace/departureTime/arrivalTime | 实际车站/机场航站楼和 HH:mm；不把城市内所有车站视为同一位置 |
+| arrivalDayText/durationText/connectionType/connectionText | 明确跨日和总耗时，直达/直飞、经停、中转及原文；中转等待不冒充全程时间 |
+| price | 列表展示价；amountMinor 为人民币分；basis 为 starting、conditional、per_seat、unknown |
+| seats[] | 具体列车席别、独立报价、余票原文；remaining 仅明确 N 张时提供 |
+| seats[].availability | available、unavailable（含抢票）、not_on_sale、unknown；没有库存不标可预订 |
+| feeInclusion/conditionsText/cabinText | 明确包含/不含税费或 unknown，以及优惠标签和舱等原文；不自动叠加机建燃油 |
+| url/collectedAt/rawText/warnings/diagnostics | 来源、查询时间、有限卡片原文、边界说明和缺字段丢弃计数 |
+
+交通成功记录保持 `partial`。已加载候选经筛选为零或页面明确无班次为 `empty`；预售提示且无记录为 `not_on_sale`。缺班次、时刻、站点的行丢弃并计数，不能把结构变化当作无票。票价只用指定报价节点，优惠“已减 ¥103”不替代“¥427 起”；会员等条件保留，景点赠券不直接视为机票券后价。未核实税费、行李和退改不补造。所有字段、嵌套对象及内部快照在契约中描述并校验，不开放任意脚本输入。
+
 ## 采集与状态
 
 快照最多包含 40 个卡片、60 个链接和 20,000 字符正文。携程 DOM 有且仅有一个可见 Current price 标记时，只将其金额作为当前价，并保留可见的优惠条件文字；原价与优惠金额仍保留在记录 text 中供追溯。仅有 Original price 或存在多个当前价时不猜测金额；新客、首单、首住、会员与券类文字标记 conditional。携程 DOM 没有匹配卡片时，尝试固定 `Accessibility.getFullAXTree` 适配器，仅用唯一 `Current price` 作为当前价格，原价不会替代当前价。该适配器依赖站点当前标签和排列，变化时需更新。
@@ -38,6 +65,7 @@ maxPrice 为可选人民币元上限，仅在本批已采集记录中筛选明�
 | `login_required` | 检测到明确登录提示 |
 | `verification_required` | 检测到安全验证或访问频繁提示 |
 | `blocked` | 页面显示 403 / Access Denied 等阻断 |
+| `not_on_sale` | 交通页面明确提示未开售或超出预售期，无交通记录 |
 | `loading` | 页面加载中或尚无文本 |
 | `empty` | 页面明确显示无匹配结果 |
 | `layout_changed` | 页面有文本，但选择器没有匹配；不能认定没有数据 |
@@ -55,3 +83,6 @@ maxPrice 为可选人民币元上限，仅在本批已采集记录中筛选明�
 只使用可信运行上下文的 `run.state.profile`，由宿主按真实用户及 Profile 隔离，不接受调用方传入分区身份。键为 `last-collection-v1`，版本为 1，存储已校验的 `collection`。无记录返回 `present:false`；读取到非法记录时抛出错误，不自动覆盖或猜测默认值。
 
 采集结果包含 `schemaVersion:1`；v0.2 为 collection 添加可选 search，不改变已有字段含义；v0.1 记录无该字段仍可读，无需迁移。v0.2.1 完善表单适配、导航等待和当前价识别，不改变字段类型；历史歧义价格不会自动猜测补全，重新采集可获得新结果。v0.2.2 将工具 content 改为 data 的 JSON 文本并扩大文本限制，持久化 collection 不变；MCP 消费方可以直接解析记录，异常文本包含具体原因。后续不兼容变更须升级版本、实现迁移并补充说明与测试。脚手架 greeting/settings 示例未在本插件发布，不做兼容。
+
+
+v0.3.0 新增独立 `last-transport-v1`（transport-result / schemaVersion:1），仅保存核对成功的 partial 或 empty 交通结果；失败不覆盖。酒店/攻略 `last-collection-v1` 不变，旧记录无需迁移。UI 初次打开展示两类保存结果中较新的一个。交通来源使用专用模型，不扩大酒店/攻略记录类型。

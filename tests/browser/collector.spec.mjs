@@ -38,7 +38,7 @@ async function mount(page, result, fail = false) {
     const ctx = { lifecycle: { add: dispose => { window.disposeTravel = dispose } }, rpc: { call: async (name, input) => {
       if (name === 'list-sources') return { sources: directory }
       if (name === 'list-tabs') return { tabs: [{ id: 'test-tab', title: '杭州酒店', source: 'ctrip', url: result.url, loading: false }] }
-      if (name === 'last-result') return { present: false }
+      if (['last-result', 'last-transport'].includes(name)) return { present: false }
       if (name === 'collect-page') { if (fail) throw new Error('站点要求重新登录'); return result }
       throw new Error(`unexpected ${name}`)
     } } }

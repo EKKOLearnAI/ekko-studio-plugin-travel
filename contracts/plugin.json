@@ -32,7 +32,9 @@
                   "xiaohongshu",
                   "meituan",
                   "ctrip-guide",
-                  "mafengwo"
+                  "mafengwo",
+                  "ctrip-trains",
+                  "ctrip-flights"
                 ]
               },
               "name": {
@@ -46,7 +48,9 @@
                 "enum": [
                   "hotel",
                   "guide",
-                  "deal"
+                  "deal",
+                  "train",
+                  "flight"
                 ]
               },
               "home": {
@@ -83,7 +87,9 @@
             "xiaohongshu",
             "meituan",
             "ctrip-guide",
-            "mafengwo"
+            "mafengwo",
+            "ctrip-trains",
+            "ctrip-flights"
           ]
         },
         "url": {
@@ -142,7 +148,9 @@
             "xiaohongshu",
             "meituan",
             "ctrip-guide",
-            "mafengwo"
+            "mafengwo",
+            "ctrip-trains",
+            "ctrip-flights"
           ]
         },
         "loading": {
@@ -194,7 +202,9 @@
                   "xiaohongshu",
                   "meituan",
                   "ctrip-guide",
-                  "mafengwo"
+                  "mafengwo",
+                  "ctrip-trains",
+                  "ctrip-flights"
                 ]
               },
               "loading": {
@@ -1107,7 +1117,9 @@
                       "xiaohongshu",
                       "meituan",
                       "ctrip-guide",
-                      "mafengwo"
+                      "mafengwo",
+                      "ctrip-trains",
+                      "ctrip-flights"
                     ]
                   },
                   "loading": {
@@ -1185,7 +1197,9 @@
                 "xiaohongshu",
                 "meituan",
                 "ctrip-guide",
-                "mafengwo"
+                "mafengwo",
+                "ctrip-trains",
+                "ctrip-flights"
               ]
             },
             "loading": {
@@ -2163,6 +2177,2013 @@
         "content"
       ],
       "additionalProperties": false
+    },
+    "train-query": {
+      "type": "object",
+      "description": "按出发地、目的地和日期查列车，默认 G/D/C 动车高铁。",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "departureDate": {
+          "type": "string",
+          "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "highSpeedOnly": {
+          "type": "boolean",
+          "description": "默认 true；只保留当前加载记录中的 G/D/C 字头列车，false 包括其他车次。"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "departureDate"
+      ],
+      "additionalProperties": false
+    },
+    "flight-query": {
+      "type": "object",
+      "description": "查询国内单程 1 成人机票，默认经济舱直飞。",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "departureDate": {
+          "type": "string",
+          "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "directOnly": {
+          "type": "boolean",
+          "description": "默认 true；只保留当前加载记录中明确直飞的航班。"
+        },
+        "cabin": {
+          "type": "string",
+          "description": "默认 economy 经济舱；all 不限舱等。单程 1 成人，暂不支持儿童或婴儿。",
+          "maxLength": 20,
+          "enum": [
+            "economy",
+            "all"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "departureDate"
+      ],
+      "additionalProperties": false
+    },
+    "transport-query": {
+      "type": "object",
+      "description": "补齐默认值后的交通查询；仅包含相应 mode 的筛选字段。",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "交通类型。",
+          "maxLength": 20,
+          "enum": [
+            "train",
+            "flight"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+          "maxLength": 80,
+          "minLength": 1
+        },
+        "departureDate": {
+          "type": "string",
+          "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "highSpeedOnly": {
+          "type": "boolean",
+          "description": "默认 true；只保留当前加载记录中的 G/D/C 字头列车，false 包括其他车次。"
+        },
+        "directOnly": {
+          "type": "boolean",
+          "description": "默认 true；只保留当前加载记录中明确直飞的航班。"
+        },
+        "cabin": {
+          "type": "string",
+          "description": "默认 economy 经济舱；all 不限舱等。单程 1 成人，暂不支持儿童或婴儿。",
+          "maxLength": 20,
+          "enum": [
+            "economy",
+            "all"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "mode",
+        "from",
+        "to",
+        "departureDate",
+        "limit"
+      ],
+      "additionalProperties": false
+    },
+    "transport-page": {
+      "type": "object",
+      "description": "固定 DOM 脚本内部快照，只读交通查询区域。",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "原始结果页地址，输出前清理。",
+          "maxLength": 16000
+        },
+        "title": {
+          "type": "string",
+          "description": "页面标题。",
+          "maxLength": 500
+        },
+        "readyState": {
+          "type": "string",
+          "description": "文档加载状态。",
+          "maxLength": 20,
+          "enum": [
+            "loading",
+            "interactive",
+            "complete"
+          ]
+        },
+        "blocking": {
+          "type": "string",
+          "description": "访问障碍，空字符串表示未发现。",
+          "maxLength": 40,
+          "enum": [
+            "",
+            "blocked",
+            "verification_required",
+            "login_required"
+          ]
+        },
+        "fromLabel": {
+          "type": "string",
+          "description": "页面出发地输入值。",
+          "maxLength": 3000
+        },
+        "toLabel": {
+          "type": "string",
+          "description": "页面目的地输入值。",
+          "maxLength": 3000
+        },
+        "dateLabel": {
+          "type": "string",
+          "description": "页面实际出发日期。",
+          "maxLength": 3000
+        },
+        "cabinLabel": {
+          "type": "string",
+          "description": "机票舱等条件原文。",
+          "maxLength": 3000
+        },
+        "tripLabel": {
+          "type": "string",
+          "description": "页面行程类型。",
+          "maxLength": 3000
+        },
+        "heading": {
+          "type": "string",
+          "description": "结果页标题。",
+          "maxLength": 3000
+        },
+        "loadedCount": {
+          "type": "integer",
+          "description": "当前 DOM 加载的卡片数。",
+          "minimum": 0
+        },
+        "matchedCount": {
+          "type": "integer",
+          "description": "已加载卡片中符合 G/D/C 或直飞条件的数量。",
+          "minimum": 0
+        },
+        "rows": {
+          "type": "array",
+          "description": "固定脚本截取的匹配卡片。",
+          "items": {
+            "type": "object",
+            "description": "交通原始卡片。",
+            "properties": {
+              "serviceCodes": {
+                "type": "array",
+                "description": "车次或各航段航班号；代码共享不自动当成中转。",
+                "items": {
+                  "type": "string",
+                  "description": "车次/航班号。",
+                  "maxLength": 40
+                },
+                "maxItems": 4
+              },
+              "provider": {
+                "type": "string",
+                "description": "铁路或航空公司名称。",
+                "maxLength": 3000
+              },
+              "departurePlace": {
+                "type": "string",
+                "description": "实际出发车站或机场航站楼。",
+                "maxLength": 3000
+              },
+              "arrivalPlace": {
+                "type": "string",
+                "description": "实际到达车站或机场航站楼。",
+                "maxLength": 3000
+              },
+              "departureTime": {
+                "type": "string",
+                "description": "出发时间原文。",
+                "maxLength": 3000
+              },
+              "arrivalTime": {
+                "type": "string",
+                "description": "到达时间原文。",
+                "maxLength": 3000
+              },
+              "arrivalDayText": {
+                "type": "string",
+                "description": "跨日原文，无明确标注时为空。",
+                "maxLength": 3000
+              },
+              "durationText": {
+                "type": "string",
+                "description": "明确的总耗时原文，不把中转等待当作全程耗时。",
+                "maxLength": 3000
+              },
+              "connectionType": {
+                "type": "string",
+                "description": "直达/直飞、经停、中转或未知。",
+                "maxLength": 20,
+                "enum": [
+                  "direct",
+                  "stopover",
+                  "connection",
+                  "unknown"
+                ]
+              },
+              "connectionText": {
+                "type": "string",
+                "description": "经停或中转原文。",
+                "maxLength": 3000
+              },
+              "cabinText": {
+                "type": "string",
+                "description": "机票展示舱等原文，列车为空。",
+                "maxLength": 3000
+              },
+              "priceText": {
+                "type": "string",
+                "description": "当前列表展示价及起价、会员等限制，不包含折扣金额。",
+                "maxLength": 500
+              },
+              "currency": {
+                "type": "string",
+                "description": "仅页面明确人民币符号时为 CNY，否则为空。",
+                "maxLength": 10,
+                "enum": [
+                  "CNY",
+                  ""
+                ]
+              },
+              "conditionsText": {
+                "type": "string",
+                "description": "会员、优惠和其他展示标签原文。",
+                "maxLength": 600
+              },
+              "feeText": {
+                "type": "string",
+                "description": "明确的税费含否原文，缺失为空。",
+                "maxLength": 3000
+              },
+              "seats": {
+                "type": "array",
+                "description": "各列车席别。",
+                "items": {
+                  "type": "object",
+                  "description": "网页席别报价和余票原文。",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "席别名称。",
+                      "maxLength": 3000
+                    },
+                    "availabilityText": {
+                      "type": "string",
+                      "description": "有票、剩余张数、抢票或未知状态原文。",
+                      "maxLength": 3000
+                    },
+                    "priceText": {
+                      "type": "string",
+                      "description": "该席别的单一金额原文；未提供时为空。",
+                      "maxLength": 3000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "availabilityText",
+                    "priceText"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10
+              },
+              "rawText": {
+                "type": "string",
+                "description": "该查询卡片有限原文；不读取乘客、账户或 Cookie。",
+                "maxLength": 3000
+              }
+            },
+            "required": [
+              "serviceCodes",
+              "provider",
+              "departurePlace",
+              "arrivalPlace",
+              "departureTime",
+              "arrivalTime",
+              "arrivalDayText",
+              "durationText",
+              "connectionType",
+              "connectionText",
+              "cabinText",
+              "priceText",
+              "currency",
+              "conditionsText",
+              "feeText",
+              "seats",
+              "rawText"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "页面可见文字有限诊断。",
+          "maxLength": 2400
+        }
+      },
+      "required": [
+        "url",
+        "title",
+        "readyState",
+        "blocking",
+        "fromLabel",
+        "toLabel",
+        "dateLabel",
+        "cabinLabel",
+        "tripLabel",
+        "heading",
+        "loadedCount",
+        "matchedCount",
+        "rows",
+        "excerpt"
+      ],
+      "additionalProperties": false
+    },
+    "flight-city-command": {
+      "type": "object",
+      "description": "固定机票城市选择脚本的动作。",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "inspect 读取；focus 聚焦选中文本；choose 唯一精确城市匹配。",
+          "maxLength": 20,
+          "enum": [
+            "inspect",
+            "focus",
+            "choose"
+          ]
+        },
+        "field": {
+          "type": "string",
+          "description": "要操作的出发地或目的地。",
+          "maxLength": 10,
+          "enum": [
+            "from",
+            "to"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "description": "用于完整匹配的城市中文名。",
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "flight-city-state": {
+      "type": "object",
+      "description": "机票查询表单状态，不读取页面私有全局变量。",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "页面地址。",
+          "maxLength": 16000
+        },
+        "readyState": {
+          "type": "string",
+          "description": "文档状态。",
+          "maxLength": 20,
+          "enum": [
+            "loading",
+            "interactive",
+            "complete"
+          ]
+        },
+        "ready": {
+          "type": "boolean",
+          "description": "出发及目的城市框是否可操作。"
+        },
+        "fromLabel": {
+          "type": "string",
+          "description": "出发城市及已选代码。",
+          "maxLength": 300
+        },
+        "toLabel": {
+          "type": "string",
+          "description": "目的城市及已选代码。",
+          "maxLength": 300
+        },
+        "candidateCount": {
+          "type": "integer",
+          "description": "唯一完整城市匹配候选数。",
+          "minimum": 0
+        },
+        "blocking": {
+          "type": "string",
+          "description": "验证状态。",
+          "maxLength": 40,
+          "enum": [
+            "",
+            "verification_required"
+          ]
+        }
+      },
+      "required": [
+        "url",
+        "readyState",
+        "ready",
+        "fromLabel",
+        "toLabel",
+        "candidateCount",
+        "blocking"
+      ],
+      "additionalProperties": false
+    },
+    "transport-result": {
+      "type": "object",
+      "description": "核对条件后的交通结果，始终标注加载覆盖范围及采集时间。",
+      "properties": {
+        "schemaVersion": {
+          "type": "integer",
+          "description": "结果版本。",
+          "enum": [
+            1
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "description": "交通类型。",
+          "maxLength": 20,
+          "enum": [
+            "train",
+            "flight"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "description": "携程交通来源。",
+          "maxLength": 30,
+          "enum": [
+            "ctrip-trains",
+            "ctrip-flights"
+          ]
+        },
+        "tabId": {
+          "type": "string",
+          "description": "宿主标签页 ID。",
+          "maxLength": 200
+        },
+        "url": {
+          "type": "string",
+          "description": "清理会话参数后的结果页链接。",
+          "maxLength": 4096
+        },
+        "pageTitle": {
+          "type": "string",
+          "description": "页面标题。",
+          "maxLength": 500
+        },
+        "collectedAt": {
+          "type": "integer",
+          "description": "采集时间 Unix 毫秒。",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "description": "partial 为已核实条件的部分加载数据；empty 明确无匹配；其他说明失败原因。",
+          "maxLength": 40,
+          "enum": [
+            "partial",
+            "empty",
+            "not_on_sale",
+            "login_required",
+            "verification_required",
+            "blocked",
+            "layout_changed"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "可读的状态说明。",
+          "maxLength": 1000
+        },
+        "requested": {
+          "type": "object",
+          "description": "补齐默认值后的交通查询；仅包含相应 mode 的筛选字段。",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "description": "交通类型。",
+              "maxLength": 20,
+              "enum": [
+                "train",
+                "flight"
+              ]
+            },
+            "from": {
+              "type": "string",
+              "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+              "maxLength": 80,
+              "minLength": 1
+            },
+            "to": {
+              "type": "string",
+              "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+              "maxLength": 80,
+              "minLength": 1
+            },
+            "departureDate": {
+              "type": "string",
+              "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+              "maxLength": 10,
+              "minLength": 10
+            },
+            "highSpeedOnly": {
+              "type": "boolean",
+              "description": "默认 true；只保留当前加载记录中的 G/D/C 字头列车，false 包括其他车次。"
+            },
+            "directOnly": {
+              "type": "boolean",
+              "description": "默认 true；只保留当前加载记录中明确直飞的航班。"
+            },
+            "cabin": {
+              "type": "string",
+              "description": "默认 economy 经济舱；all 不限舱等。单程 1 成人，暂不支持儿童或婴儿。",
+              "maxLength": 20,
+              "enum": [
+                "economy",
+                "all"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "required": [
+            "mode",
+            "from",
+            "to",
+            "departureDate",
+            "limit"
+          ],
+          "additionalProperties": false
+        },
+        "conditionsVerified": {
+          "type": "boolean",
+          "description": "URL 和结果页查询字段均核对，采集后再次确认未变化。"
+        },
+        "observed": {
+          "type": "object",
+          "description": "实际页面查询条件。",
+          "properties": {
+            "from": {
+              "type": "string",
+              "description": "出发地可见值。",
+              "maxLength": 3000
+            },
+            "to": {
+              "type": "string",
+              "description": "目的地可见值。",
+              "maxLength": 3000
+            },
+            "departureDate": {
+              "type": "string",
+              "description": "日期原文。",
+              "maxLength": 3000
+            },
+            "cabin": {
+              "type": "string",
+              "description": "舱等原文，列车为空。",
+              "maxLength": 3000
+            }
+          },
+          "required": [
+            "from",
+            "to",
+            "departureDate",
+            "cabin"
+          ],
+          "additionalProperties": false
+        },
+        "loadedCount": {
+          "type": "integer",
+          "description": "当前页面加载的全部候选卡片数，非全站总数。",
+          "minimum": 0
+        },
+        "matchedCount": {
+          "type": "integer",
+          "description": "当前加载卡片中符合筛选的数量。",
+          "minimum": 0
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "匹配卡片数大于返回条数；即使 false 也不保证已加载全量。"
+        },
+        "records": {
+          "type": "array",
+          "description": "清洗后有效班次。",
+          "items": {
+            "type": "object",
+            "description": "保留具体车站/机场的单程交通记录。",
+            "properties": {
+              "serviceCodes": {
+                "type": "array",
+                "description": "车次或各航段航班号；代码共享不自动当成中转。",
+                "items": {
+                  "type": "string",
+                  "description": "车次/航班号。",
+                  "maxLength": 40
+                },
+                "maxItems": 4
+              },
+              "provider": {
+                "type": "string",
+                "description": "铁路或航空公司名称。",
+                "maxLength": 3000
+              },
+              "departurePlace": {
+                "type": "string",
+                "description": "实际出发车站或机场航站楼。",
+                "maxLength": 3000
+              },
+              "arrivalPlace": {
+                "type": "string",
+                "description": "实际到达车站或机场航站楼。",
+                "maxLength": 3000
+              },
+              "departureTime": {
+                "type": "string",
+                "description": "出发时间原文。",
+                "maxLength": 3000
+              },
+              "arrivalTime": {
+                "type": "string",
+                "description": "到达时间原文。",
+                "maxLength": 3000
+              },
+              "arrivalDayText": {
+                "type": "string",
+                "description": "跨日原文，无明确标注时为空。",
+                "maxLength": 3000
+              },
+              "durationText": {
+                "type": "string",
+                "description": "明确的总耗时原文，不把中转等待当作全程耗时。",
+                "maxLength": 3000
+              },
+              "connectionType": {
+                "type": "string",
+                "description": "直达/直飞、经停、中转或未知。",
+                "maxLength": 20,
+                "enum": [
+                  "direct",
+                  "stopover",
+                  "connection",
+                  "unknown"
+                ]
+              },
+              "connectionText": {
+                "type": "string",
+                "description": "经停或中转原文。",
+                "maxLength": 3000
+              },
+              "cabinText": {
+                "type": "string",
+                "description": "机票展示舱等原文，列车为空。",
+                "maxLength": 3000
+              },
+              "conditionsText": {
+                "type": "string",
+                "description": "会员、优惠和其他展示标签原文。",
+                "maxLength": 600
+              },
+              "rawText": {
+                "type": "string",
+                "description": "该查询卡片有限原文；不读取乘客、账户或 Cookie。",
+                "maxLength": 3000
+              },
+              "price": {
+                "type": "object",
+                "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                "properties": {
+                  "raw": {
+                    "type": "string",
+                    "description": "单一展示价格及可见条件；未知为空。",
+                    "maxLength": 500
+                  },
+                  "basis": {
+                    "type": "string",
+                    "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                    "maxLength": 20,
+                    "enum": [
+                      "unknown",
+                      "starting",
+                      "conditional",
+                      "per_seat"
+                    ]
+                  },
+                  "amountMinor": {
+                    "type": "integer",
+                    "description": "人民币分，必须是明确的单一正金额。",
+                    "minimum": 1,
+                    "maximum": 100000000
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "币种，只解析明确人民币符号。",
+                    "enum": [
+                      "CNY"
+                    ]
+                  }
+                },
+                "required": [
+                  "raw",
+                  "basis"
+                ],
+                "additionalProperties": false
+              },
+              "feeInclusion": {
+                "type": "string",
+                "description": "included 明确包含；excluded 明确不含；unknown 未完整核实税费。",
+                "maxLength": 20,
+                "enum": [
+                  "included",
+                  "excluded",
+                  "unknown"
+                ]
+              },
+              "seats": {
+                "type": "array",
+                "description": "列车各席别报价，机票为空。",
+                "items": {
+                  "type": "object",
+                  "description": "单个列车席别；抢票明确视为不可直接购买。",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "席别名称。",
+                      "maxLength": 3000
+                    },
+                    "availability": {
+                      "type": "string",
+                      "description": "available 有票；unavailable 无票或抢票；not_on_sale 未开售；unknown 未知。",
+                      "maxLength": 20,
+                      "enum": [
+                        "available",
+                        "unavailable",
+                        "not_on_sale",
+                        "unknown"
+                      ]
+                    },
+                    "availabilityText": {
+                      "type": "string",
+                      "description": "网页余票/抢票原文。",
+                      "maxLength": 3000
+                    },
+                    "remaining": {
+                      "type": "integer",
+                      "description": "仅明确 N 张时提供，不推断精确库存。",
+                      "minimum": 0
+                    },
+                    "price": {
+                      "type": "object",
+                      "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                      "properties": {
+                        "raw": {
+                          "type": "string",
+                          "description": "单一展示价格及可见条件；未知为空。",
+                          "maxLength": 500
+                        },
+                        "basis": {
+                          "type": "string",
+                          "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                          "maxLength": 20,
+                          "enum": [
+                            "unknown",
+                            "starting",
+                            "conditional",
+                            "per_seat"
+                          ]
+                        },
+                        "amountMinor": {
+                          "type": "integer",
+                          "description": "人民币分，必须是明确的单一正金额。",
+                          "minimum": 1,
+                          "maximum": 100000000
+                        },
+                        "currency": {
+                          "type": "string",
+                          "description": "币种，只解析明确人民币符号。",
+                          "enum": [
+                            "CNY"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "raw",
+                        "basis"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "availability",
+                    "availabilityText",
+                    "price"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10
+              },
+              "url": {
+                "type": "string",
+                "description": "经清理的原始查询页链接。",
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "serviceCodes",
+              "provider",
+              "departurePlace",
+              "arrivalPlace",
+              "departureTime",
+              "arrivalTime",
+              "arrivalDayText",
+              "durationText",
+              "connectionType",
+              "connectionText",
+              "cabinText",
+              "conditionsText",
+              "rawText",
+              "price",
+              "feeInclusion",
+              "seats",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 50
+        },
+        "warnings": {
+          "type": "array",
+          "description": "覆盖范围、价格、余票和费用限制。",
+          "items": {
+            "type": "string",
+            "description": "一条说明。",
+            "maxLength": 1000
+          },
+          "maxItems": 20
+        },
+        "diagnostics": {
+          "type": "object",
+          "description": "本地有限诊断，不提交真实页面到公开仓库。",
+          "properties": {
+            "invalidRows": {
+              "type": "integer",
+              "description": "因缺少班次、时间或站点而丢弃的卡片数。",
+              "minimum": 0
+            },
+            "excerpt": {
+              "type": "string",
+              "description": "页面诊断片段。",
+              "maxLength": 2400
+            }
+          },
+          "required": [
+            "invalidRows",
+            "excerpt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "mode",
+        "source",
+        "tabId",
+        "url",
+        "pageTitle",
+        "collectedAt",
+        "status",
+        "message",
+        "requested",
+        "conditionsVerified",
+        "observed",
+        "loadedCount",
+        "matchedCount",
+        "truncated",
+        "records",
+        "warnings",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "last-transport": {
+      "type": "object",
+      "description": "当前用户/Profile 最近交通结果，与酒店攻略独立保存。",
+      "properties": {
+        "present": {
+          "type": "boolean",
+          "description": "是否有保存结果。"
+        },
+        "result": {
+          "type": "object",
+          "description": "核对条件后的交通结果，始终标注加载覆盖范围及采集时间。",
+          "properties": {
+            "schemaVersion": {
+              "type": "integer",
+              "description": "结果版本。",
+              "enum": [
+                1
+              ]
+            },
+            "mode": {
+              "type": "string",
+              "description": "交通类型。",
+              "maxLength": 20,
+              "enum": [
+                "train",
+                "flight"
+              ]
+            },
+            "source": {
+              "type": "string",
+              "description": "携程交通来源。",
+              "maxLength": 30,
+              "enum": [
+                "ctrip-trains",
+                "ctrip-flights"
+              ]
+            },
+            "tabId": {
+              "type": "string",
+              "description": "宿主标签页 ID。",
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "description": "清理会话参数后的结果页链接。",
+              "maxLength": 4096
+            },
+            "pageTitle": {
+              "type": "string",
+              "description": "页面标题。",
+              "maxLength": 500
+            },
+            "collectedAt": {
+              "type": "integer",
+              "description": "采集时间 Unix 毫秒。",
+              "minimum": 0
+            },
+            "status": {
+              "type": "string",
+              "description": "partial 为已核实条件的部分加载数据；empty 明确无匹配；其他说明失败原因。",
+              "maxLength": 40,
+              "enum": [
+                "partial",
+                "empty",
+                "not_on_sale",
+                "login_required",
+                "verification_required",
+                "blocked",
+                "layout_changed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "可读的状态说明。",
+              "maxLength": 1000
+            },
+            "requested": {
+              "type": "object",
+              "description": "补齐默认值后的交通查询；仅包含相应 mode 的筛选字段。",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "description": "交通类型。",
+                  "maxLength": 20,
+                  "enum": [
+                    "train",
+                    "flight"
+                  ]
+                },
+                "from": {
+                  "type": "string",
+                  "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "departureDate": {
+                  "type": "string",
+                  "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+                  "maxLength": 10,
+                  "minLength": 10
+                },
+                "highSpeedOnly": {
+                  "type": "boolean",
+                  "description": "默认 true；只保留当前加载记录中的 G/D/C 字头列车，false 包括其他车次。"
+                },
+                "directOnly": {
+                  "type": "boolean",
+                  "description": "默认 true；只保留当前加载记录中明确直飞的航班。"
+                },
+                "cabin": {
+                  "type": "string",
+                  "description": "默认 economy 经济舱；all 不限舱等。单程 1 成人，暂不支持儿童或婴儿。",
+                  "maxLength": 20,
+                  "enum": [
+                    "economy",
+                    "all"
+                  ]
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+                  "minimum": 1,
+                  "maximum": 50
+                }
+              },
+              "required": [
+                "mode",
+                "from",
+                "to",
+                "departureDate",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "conditionsVerified": {
+              "type": "boolean",
+              "description": "URL 和结果页查询字段均核对，采集后再次确认未变化。"
+            },
+            "observed": {
+              "type": "object",
+              "description": "实际页面查询条件。",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "出发地可见值。",
+                  "maxLength": 3000
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目的地可见值。",
+                  "maxLength": 3000
+                },
+                "departureDate": {
+                  "type": "string",
+                  "description": "日期原文。",
+                  "maxLength": 3000
+                },
+                "cabin": {
+                  "type": "string",
+                  "description": "舱等原文，列车为空。",
+                  "maxLength": 3000
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "departureDate",
+                "cabin"
+              ],
+              "additionalProperties": false
+            },
+            "loadedCount": {
+              "type": "integer",
+              "description": "当前页面加载的全部候选卡片数，非全站总数。",
+              "minimum": 0
+            },
+            "matchedCount": {
+              "type": "integer",
+              "description": "当前加载卡片中符合筛选的数量。",
+              "minimum": 0
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "匹配卡片数大于返回条数；即使 false 也不保证已加载全量。"
+            },
+            "records": {
+              "type": "array",
+              "description": "清洗后有效班次。",
+              "items": {
+                "type": "object",
+                "description": "保留具体车站/机场的单程交通记录。",
+                "properties": {
+                  "serviceCodes": {
+                    "type": "array",
+                    "description": "车次或各航段航班号；代码共享不自动当成中转。",
+                    "items": {
+                      "type": "string",
+                      "description": "车次/航班号。",
+                      "maxLength": 40
+                    },
+                    "maxItems": 4
+                  },
+                  "provider": {
+                    "type": "string",
+                    "description": "铁路或航空公司名称。",
+                    "maxLength": 3000
+                  },
+                  "departurePlace": {
+                    "type": "string",
+                    "description": "实际出发车站或机场航站楼。",
+                    "maxLength": 3000
+                  },
+                  "arrivalPlace": {
+                    "type": "string",
+                    "description": "实际到达车站或机场航站楼。",
+                    "maxLength": 3000
+                  },
+                  "departureTime": {
+                    "type": "string",
+                    "description": "出发时间原文。",
+                    "maxLength": 3000
+                  },
+                  "arrivalTime": {
+                    "type": "string",
+                    "description": "到达时间原文。",
+                    "maxLength": 3000
+                  },
+                  "arrivalDayText": {
+                    "type": "string",
+                    "description": "跨日原文，无明确标注时为空。",
+                    "maxLength": 3000
+                  },
+                  "durationText": {
+                    "type": "string",
+                    "description": "明确的总耗时原文，不把中转等待当作全程耗时。",
+                    "maxLength": 3000
+                  },
+                  "connectionType": {
+                    "type": "string",
+                    "description": "直达/直飞、经停、中转或未知。",
+                    "maxLength": 20,
+                    "enum": [
+                      "direct",
+                      "stopover",
+                      "connection",
+                      "unknown"
+                    ]
+                  },
+                  "connectionText": {
+                    "type": "string",
+                    "description": "经停或中转原文。",
+                    "maxLength": 3000
+                  },
+                  "cabinText": {
+                    "type": "string",
+                    "description": "机票展示舱等原文，列车为空。",
+                    "maxLength": 3000
+                  },
+                  "conditionsText": {
+                    "type": "string",
+                    "description": "会员、优惠和其他展示标签原文。",
+                    "maxLength": 600
+                  },
+                  "rawText": {
+                    "type": "string",
+                    "description": "该查询卡片有限原文；不读取乘客、账户或 Cookie。",
+                    "maxLength": 3000
+                  },
+                  "price": {
+                    "type": "object",
+                    "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                    "properties": {
+                      "raw": {
+                        "type": "string",
+                        "description": "单一展示价格及可见条件；未知为空。",
+                        "maxLength": 500
+                      },
+                      "basis": {
+                        "type": "string",
+                        "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                        "maxLength": 20,
+                        "enum": [
+                          "unknown",
+                          "starting",
+                          "conditional",
+                          "per_seat"
+                        ]
+                      },
+                      "amountMinor": {
+                        "type": "integer",
+                        "description": "人民币分，必须是明确的单一正金额。",
+                        "minimum": 1,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "type": "string",
+                        "description": "币种，只解析明确人民币符号。",
+                        "enum": [
+                          "CNY"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "raw",
+                      "basis"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "feeInclusion": {
+                    "type": "string",
+                    "description": "included 明确包含；excluded 明确不含；unknown 未完整核实税费。",
+                    "maxLength": 20,
+                    "enum": [
+                      "included",
+                      "excluded",
+                      "unknown"
+                    ]
+                  },
+                  "seats": {
+                    "type": "array",
+                    "description": "列车各席别报价，机票为空。",
+                    "items": {
+                      "type": "object",
+                      "description": "单个列车席别；抢票明确视为不可直接购买。",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "席别名称。",
+                          "maxLength": 3000
+                        },
+                        "availability": {
+                          "type": "string",
+                          "description": "available 有票；unavailable 无票或抢票；not_on_sale 未开售；unknown 未知。",
+                          "maxLength": 20,
+                          "enum": [
+                            "available",
+                            "unavailable",
+                            "not_on_sale",
+                            "unknown"
+                          ]
+                        },
+                        "availabilityText": {
+                          "type": "string",
+                          "description": "网页余票/抢票原文。",
+                          "maxLength": 3000
+                        },
+                        "remaining": {
+                          "type": "integer",
+                          "description": "仅明确 N 张时提供，不推断精确库存。",
+                          "minimum": 0
+                        },
+                        "price": {
+                          "type": "object",
+                          "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                          "properties": {
+                            "raw": {
+                              "type": "string",
+                              "description": "单一展示价格及可见条件；未知为空。",
+                              "maxLength": 500
+                            },
+                            "basis": {
+                              "type": "string",
+                              "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                              "maxLength": 20,
+                              "enum": [
+                                "unknown",
+                                "starting",
+                                "conditional",
+                                "per_seat"
+                              ]
+                            },
+                            "amountMinor": {
+                              "type": "integer",
+                              "description": "人民币分，必须是明确的单一正金额。",
+                              "minimum": 1,
+                              "maximum": 100000000
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "币种，只解析明确人民币符号。",
+                              "enum": [
+                                "CNY"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "raw",
+                            "basis"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "availability",
+                        "availabilityText",
+                        "price"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的原始查询页链接。",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "serviceCodes",
+                  "provider",
+                  "departurePlace",
+                  "arrivalPlace",
+                  "departureTime",
+                  "arrivalTime",
+                  "arrivalDayText",
+                  "durationText",
+                  "connectionType",
+                  "connectionText",
+                  "cabinText",
+                  "conditionsText",
+                  "rawText",
+                  "price",
+                  "feeInclusion",
+                  "seats",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "warnings": {
+              "type": "array",
+              "description": "覆盖范围、价格、余票和费用限制。",
+              "items": {
+                "type": "string",
+                "description": "一条说明。",
+                "maxLength": 1000
+              },
+              "maxItems": 20
+            },
+            "diagnostics": {
+              "type": "object",
+              "description": "本地有限诊断，不提交真实页面到公开仓库。",
+              "properties": {
+                "invalidRows": {
+                  "type": "integer",
+                  "description": "因缺少班次、时间或站点而丢弃的卡片数。",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "页面诊断片段。",
+                  "maxLength": 2400
+                }
+              },
+              "required": [
+                "invalidRows",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "mode",
+            "source",
+            "tabId",
+            "url",
+            "pageTitle",
+            "collectedAt",
+            "status",
+            "message",
+            "requested",
+            "conditionsVerified",
+            "observed",
+            "loadedCount",
+            "matchedCount",
+            "truncated",
+            "records",
+            "warnings",
+            "diagnostics"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "present"
+      ],
+      "additionalProperties": false
+    },
+    "tool-transport": {
+      "type": "object",
+      "description": "交通工具输出，content 包含完整 JSON 数据。",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "是否获得部分数据或核实的无匹配结果。"
+        },
+        "content": {
+          "type": "string",
+          "description": "与 data 相同的可解析 JSON；异常时具体原因。",
+          "maxLength": 1048576
+        },
+        "data": {
+          "type": "object",
+          "description": "核对条件后的交通结果，始终标注加载覆盖范围及采集时间。",
+          "properties": {
+            "schemaVersion": {
+              "type": "integer",
+              "description": "结果版本。",
+              "enum": [
+                1
+              ]
+            },
+            "mode": {
+              "type": "string",
+              "description": "交通类型。",
+              "maxLength": 20,
+              "enum": [
+                "train",
+                "flight"
+              ]
+            },
+            "source": {
+              "type": "string",
+              "description": "携程交通来源。",
+              "maxLength": 30,
+              "enum": [
+                "ctrip-trains",
+                "ctrip-flights"
+              ]
+            },
+            "tabId": {
+              "type": "string",
+              "description": "宿主标签页 ID。",
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "description": "清理会话参数后的结果页链接。",
+              "maxLength": 4096
+            },
+            "pageTitle": {
+              "type": "string",
+              "description": "页面标题。",
+              "maxLength": 500
+            },
+            "collectedAt": {
+              "type": "integer",
+              "description": "采集时间 Unix 毫秒。",
+              "minimum": 0
+            },
+            "status": {
+              "type": "string",
+              "description": "partial 为已核实条件的部分加载数据；empty 明确无匹配；其他说明失败原因。",
+              "maxLength": 40,
+              "enum": [
+                "partial",
+                "empty",
+                "not_on_sale",
+                "login_required",
+                "verification_required",
+                "blocked",
+                "layout_changed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "可读的状态说明。",
+              "maxLength": 1000
+            },
+            "requested": {
+              "type": "object",
+              "description": "补齐默认值后的交通查询；仅包含相应 mode 的筛选字段。",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "description": "交通类型。",
+                  "maxLength": 20,
+                  "enum": [
+                    "train",
+                    "flight"
+                  ]
+                },
+                "from": {
+                  "type": "string",
+                  "description": "出发城市中文名称；列车也接受站名；机票按站点选择城市全部机场。",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目的城市中文名称；列车也接受站名；不能与出发地相同。",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "departureDate": {
+                  "type": "string",
+                  "description": "出发日期 YYYY-MM-DD，按北京时间校验；实际预售以站点为准。",
+                  "maxLength": 10,
+                  "minLength": 10
+                },
+                "highSpeedOnly": {
+                  "type": "boolean",
+                  "description": "默认 true；只保留当前加载记录中的 G/D/C 字头列车，false 包括其他车次。"
+                },
+                "directOnly": {
+                  "type": "boolean",
+                  "description": "默认 true；只保留当前加载记录中明确直飞的航班。"
+                },
+                "cabin": {
+                  "type": "string",
+                  "description": "默认 economy 经济舱；all 不限舱等。单程 1 成人，暂不支持儿童或婴儿。",
+                  "maxLength": 20,
+                  "enum": [
+                    "economy",
+                    "all"
+                  ]
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "最多返回 1–50 条当前已加载的匹配记录；默认 20，不保证覆盖全部班次。",
+                  "minimum": 1,
+                  "maximum": 50
+                }
+              },
+              "required": [
+                "mode",
+                "from",
+                "to",
+                "departureDate",
+                "limit"
+              ],
+              "additionalProperties": false
+            },
+            "conditionsVerified": {
+              "type": "boolean",
+              "description": "URL 和结果页查询字段均核对，采集后再次确认未变化。"
+            },
+            "observed": {
+              "type": "object",
+              "description": "实际页面查询条件。",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "出发地可见值。",
+                  "maxLength": 3000
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目的地可见值。",
+                  "maxLength": 3000
+                },
+                "departureDate": {
+                  "type": "string",
+                  "description": "日期原文。",
+                  "maxLength": 3000
+                },
+                "cabin": {
+                  "type": "string",
+                  "description": "舱等原文，列车为空。",
+                  "maxLength": 3000
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "departureDate",
+                "cabin"
+              ],
+              "additionalProperties": false
+            },
+            "loadedCount": {
+              "type": "integer",
+              "description": "当前页面加载的全部候选卡片数，非全站总数。",
+              "minimum": 0
+            },
+            "matchedCount": {
+              "type": "integer",
+              "description": "当前加载卡片中符合筛选的数量。",
+              "minimum": 0
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "匹配卡片数大于返回条数；即使 false 也不保证已加载全量。"
+            },
+            "records": {
+              "type": "array",
+              "description": "清洗后有效班次。",
+              "items": {
+                "type": "object",
+                "description": "保留具体车站/机场的单程交通记录。",
+                "properties": {
+                  "serviceCodes": {
+                    "type": "array",
+                    "description": "车次或各航段航班号；代码共享不自动当成中转。",
+                    "items": {
+                      "type": "string",
+                      "description": "车次/航班号。",
+                      "maxLength": 40
+                    },
+                    "maxItems": 4
+                  },
+                  "provider": {
+                    "type": "string",
+                    "description": "铁路或航空公司名称。",
+                    "maxLength": 3000
+                  },
+                  "departurePlace": {
+                    "type": "string",
+                    "description": "实际出发车站或机场航站楼。",
+                    "maxLength": 3000
+                  },
+                  "arrivalPlace": {
+                    "type": "string",
+                    "description": "实际到达车站或机场航站楼。",
+                    "maxLength": 3000
+                  },
+                  "departureTime": {
+                    "type": "string",
+                    "description": "出发时间原文。",
+                    "maxLength": 3000
+                  },
+                  "arrivalTime": {
+                    "type": "string",
+                    "description": "到达时间原文。",
+                    "maxLength": 3000
+                  },
+                  "arrivalDayText": {
+                    "type": "string",
+                    "description": "跨日原文，无明确标注时为空。",
+                    "maxLength": 3000
+                  },
+                  "durationText": {
+                    "type": "string",
+                    "description": "明确的总耗时原文，不把中转等待当作全程耗时。",
+                    "maxLength": 3000
+                  },
+                  "connectionType": {
+                    "type": "string",
+                    "description": "直达/直飞、经停、中转或未知。",
+                    "maxLength": 20,
+                    "enum": [
+                      "direct",
+                      "stopover",
+                      "connection",
+                      "unknown"
+                    ]
+                  },
+                  "connectionText": {
+                    "type": "string",
+                    "description": "经停或中转原文。",
+                    "maxLength": 3000
+                  },
+                  "cabinText": {
+                    "type": "string",
+                    "description": "机票展示舱等原文，列车为空。",
+                    "maxLength": 3000
+                  },
+                  "conditionsText": {
+                    "type": "string",
+                    "description": "会员、优惠和其他展示标签原文。",
+                    "maxLength": 600
+                  },
+                  "rawText": {
+                    "type": "string",
+                    "description": "该查询卡片有限原文；不读取乘客、账户或 Cookie。",
+                    "maxLength": 3000
+                  },
+                  "price": {
+                    "type": "object",
+                    "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                    "properties": {
+                      "raw": {
+                        "type": "string",
+                        "description": "单一展示价格及可见条件；未知为空。",
+                        "maxLength": 500
+                      },
+                      "basis": {
+                        "type": "string",
+                        "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                        "maxLength": 20,
+                        "enum": [
+                          "unknown",
+                          "starting",
+                          "conditional",
+                          "per_seat"
+                        ]
+                      },
+                      "amountMinor": {
+                        "type": "integer",
+                        "description": "人民币分，必须是明确的单一正金额。",
+                        "minimum": 1,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "type": "string",
+                        "description": "币种，只解析明确人民币符号。",
+                        "enum": [
+                          "CNY"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "raw",
+                      "basis"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "feeInclusion": {
+                    "type": "string",
+                    "description": "included 明确包含；excluded 明确不含；unknown 未完整核实税费。",
+                    "maxLength": 20,
+                    "enum": [
+                      "included",
+                      "excluded",
+                      "unknown"
+                    ]
+                  },
+                  "seats": {
+                    "type": "array",
+                    "description": "列车各席别报价，机票为空。",
+                    "items": {
+                      "type": "object",
+                      "description": "单个列车席别；抢票明确视为不可直接购买。",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "席别名称。",
+                          "maxLength": 3000
+                        },
+                        "availability": {
+                          "type": "string",
+                          "description": "available 有票；unavailable 无票或抢票；not_on_sale 未开售；unknown 未知。",
+                          "maxLength": 20,
+                          "enum": [
+                            "available",
+                            "unavailable",
+                            "not_on_sale",
+                            "unknown"
+                          ]
+                        },
+                        "availabilityText": {
+                          "type": "string",
+                          "description": "网页余票/抢票原文。",
+                          "maxLength": 3000
+                        },
+                        "remaining": {
+                          "type": "integer",
+                          "description": "仅明确 N 张时提供，不推断精确库存。",
+                          "minimum": 0
+                        },
+                        "price": {
+                          "type": "object",
+                          "description": "交通列表或指定席别单人展示价，非订单成交价。",
+                          "properties": {
+                            "raw": {
+                              "type": "string",
+                              "description": "单一展示价格及可见条件；未知为空。",
+                              "maxLength": 500
+                            },
+                            "basis": {
+                              "type": "string",
+                              "description": "starting 列表起价；conditional 会员等条件价；per_seat 单席别价；unknown 无法确定。",
+                              "maxLength": 20,
+                              "enum": [
+                                "unknown",
+                                "starting",
+                                "conditional",
+                                "per_seat"
+                              ]
+                            },
+                            "amountMinor": {
+                              "type": "integer",
+                              "description": "人民币分，必须是明确的单一正金额。",
+                              "minimum": 1,
+                              "maximum": 100000000
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "币种，只解析明确人民币符号。",
+                              "enum": [
+                                "CNY"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "raw",
+                            "basis"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "availability",
+                        "availabilityText",
+                        "price"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 10
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的原始查询页链接。",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "serviceCodes",
+                  "provider",
+                  "departurePlace",
+                  "arrivalPlace",
+                  "departureTime",
+                  "arrivalTime",
+                  "arrivalDayText",
+                  "durationText",
+                  "connectionType",
+                  "connectionText",
+                  "cabinText",
+                  "conditionsText",
+                  "rawText",
+                  "price",
+                  "feeInclusion",
+                  "seats",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 50
+            },
+            "warnings": {
+              "type": "array",
+              "description": "覆盖范围、价格、余票和费用限制。",
+              "items": {
+                "type": "string",
+                "description": "一条说明。",
+                "maxLength": 1000
+              },
+              "maxItems": 20
+            },
+            "diagnostics": {
+              "type": "object",
+              "description": "本地有限诊断，不提交真实页面到公开仓库。",
+              "properties": {
+                "invalidRows": {
+                  "type": "integer",
+                  "description": "因缺少班次、时间或站点而丢弃的卡片数。",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "页面诊断片段。",
+                  "maxLength": 2400
+                }
+              },
+              "required": [
+                "invalidRows",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "mode",
+            "source",
+            "tabId",
+            "url",
+            "pageTitle",
+            "collectedAt",
+            "status",
+            "message",
+            "requested",
+            "conditionsVerified",
+            "observed",
+            "loadedCount",
+            "matchedCount",
+            "truncated",
+            "records",
+            "warnings",
+            "diagnostics"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "string",
+          "description": "具体错误说明。",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "ok",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "flight-reveal-state": {
+      "type": "object",
+      "description": "有界滚动以触发航班号懒加载；不点击订票按钮。",
+      "properties": {
+        "visited": {
+          "type": "integer",
+          "description": "本次进入视口的现有卡片数。",
+          "minimum": 0,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "visited"
+      ],
+      "additionalProperties": false
     }
   },
   "rpc": {
@@ -2195,6 +4216,21 @@
       "description": "按城市和地址/地标查询酒店，核对条件后采集并保存结果。",
       "input": "hotel-query",
       "output": "collection"
+    },
+    "search-trains": {
+      "description": "固定脚本查询列车并核对条件、清洗席别及余票。",
+      "input": "train-query",
+      "output": "transport-result"
+    },
+    "search-flights": {
+      "description": "固定脚本选择城市后查询单程机票，保留直飞、中转及税费未知状态。",
+      "input": "flight-query",
+      "output": "transport-result"
+    },
+    "last-transport": {
+      "description": "读取当前用户/Profile 最近交通查询结果。",
+      "input": "null",
+      "output": "last-transport"
     }
   },
   "tools": {
@@ -2217,6 +4253,16 @@
       "description": "固定脚本按城市和地址查询酒店，明确返回地点/关键词模式及预算核实情况。",
       "input": "hotel-query",
       "output": "tool-hotel-search"
+    },
+    "search_trains": {
+      "description": "固定脚本查询列车并核对条件、清洗席别及余票。",
+      "input": "train-query",
+      "output": "tool-transport"
+    },
+    "search_flights": {
+      "description": "固定脚本选择城市后查询单程机票，保留直飞、中转及税费未知状态。",
+      "input": "flight-query",
+      "output": "tool-transport"
     }
   },
   "commands": {},
@@ -2227,6 +4273,12 @@
     "last-collection-v1": {
       "description": "当前调用者 Profile 下最近一次结果；不保存登录凭证。",
       "model": "collection",
+      "version": 1,
+      "scope": "run.state.profile"
+    },
+    "last-transport-v1": {
+      "description": "核对条件后的最近交通结果；不含凭证或乘客信息。",
+      "model": "transport-result",
       "version": 1,
       "scope": "run.state.profile"
     }
