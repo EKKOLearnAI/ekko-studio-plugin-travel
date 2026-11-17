@@ -23,17 +23,20 @@ export async function collectPage(input, run, contract, browser = run.host.brows
   if (!source) throw new Error('只能采集支持的旅游站点')
   await browser.cdp.attach(tab.id)
   try {
-    run.signal.throwIfAborted()
-    const response = await browser.cdp.send(tab.id, 'Runtime.evaluate', { expression: captureExpression(source), returnByValue: true, awaitPromise: true })
-    if (response.exceptionDetails || !response.result || !Object.hasOwn(response.result, 'value')) throw new Error('页面脚本执行失败，请检查页面是否已经加载')
-    const snapshot = validateModel(contract, 'page-snapshot', response.result.value)
-    if (sourceForUrl(snapshot.url)?.id !== source.id) throw new Error('页面来源发生变化，请刷新后重新采集')
-    if (source.id === 'ctrip' && snapshot.blocks.length === 0) {
-      const tree = await browser.cdp.send(tab.id, 'Accessibility.getFullAXTree', {})
-      if (Array.isArray(tree.nodes)) snapshot.blocks = hotelAccessibilityBlocks(tree.nodes, snapshot.url)
-      validateModel(contract, 'page-snapshot', snapshot)
-    }
-    run.signal.throwIfAborted()
-    return validateModel(contract, 'collection', cleanSnapshot(snapshot, source, tab.id))
+    return await collectAttachedPage(tab, source, run, contract, browser)
   } finally { await browser.cdp.release(tab.id).catch(() => {}) }
+}
+export async function collectAttachedPage(tab, source, run, contract, browser) {
+  run.signal.throwIfAborted()
+  const response = await browser.cdp.send(tab.id, 'Runtime.evaluate', { expression: captureExpression(source), returnByValue: true, awaitPromise: true })
+  if (response.exceptionDetails || !response.result || !Object.hasOwn(response.result, 'value')) throw new Error('页面脚本执行失败，请检查页面是否已经加载')
+  const snapshot = validateModel(contract, 'page-snapshot', response.result.value)
+  if (sourceForUrl(snapshot.url)?.id !== source.id) throw new Error('页面来源发生变化，请刷新后重新采集')
+  if (source.id === 'ctrip' && snapshot.blocks.length === 0) {
+    const tree = await browser.cdp.send(tab.id, 'Accessibility.getFullAXTree', {})
+    if (Array.isArray(tree.nodes)) snapshot.blocks = hotelAccessibilityBlocks(tree.nodes, snapshot.url)
+    validateModel(contract, 'page-snapshot', snapshot)
+  }
+  run.signal.throwIfAborted()
+  return validateModel(contract, 'collection', cleanSnapshot(snapshot, source, tab.id))
 }

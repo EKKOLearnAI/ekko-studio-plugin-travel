@@ -6,15 +6,26 @@
 
 | RPC | 输入 | 行为 |
 | --- | --- | --- |
+| `search-hotels` | `{city,address,checkIn,checkOut,maxPrice?}` | 固定脚本选城市、提交地址、核对条件后采集并保存；失败不覆盖最近结果 |
 | `list-sources` | `null` | 返回来源目录，不读取用户浏览器 |
 | `list-tabs` | `{}` | 列出支持来源的标签页，不采集页面 |
 | `open-page` | `{source, url?}` | 校验 HTTPS 来源后新建页面；省略 URL 使用来源首页 |
 | `collect-page` | `{tabId}` | 附加 CDP，执行固定 DOM 脚本，校验、清洗并存储最后一次结果；始终尝试释放租约 |
 | `last-result` | `null` | 返回 `{present:false}` 或 `{present:true,result}` |
 
-MCP 工具 `list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`，采集状态为 `ok` 或 `partial` 才认为调用成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
+MCP 工具 `search_hotels`、`list_pages`、`open_page`、`collect_page` 复用相应处理器。工具返回 `{ok, content, data?, error?}`，采集状态为 `ok` 或 `partial` 才认为调用成功。异常返回 `ok:false`，不会隐瞒成空结果。`collect_page` 会保存结果，因此不声明只读。
 
 没有任意 JavaScript 输入、外部抓取服务、Shell、MCP 子进程或浏览器令牌配置。只能操作内置浏览器中的支持来源；CDP 权限由宿主控制。取消信号在调用前、执行采集脚本前及持久化前检查；宿主正在执行的 CDP 请求仍受其超时和租约规则约束。
+
+## 酒店查询条件
+
+`search-hotels` / `search_hotels` 必填城市、地址/商圈/地标、入住和离店日期。日期格式 YYYY-MM-DD，按北京时间今天校验，离店须晚于入住且最多 30 晚；非法条件在新建标签页前拒绝。查询使用一个新酒店标签页，保留供用户检查，每次操作最后尝试释放租约；不自动关闭用户标签页。
+
+城市通过可见联想项精确选择，不使用猜测的城市 ID；地点多义时抛出错误。地址能匹配唯一联想项则选择，未匹配则提交为关键词。固定脚本仅观察可见输入和输入框附近的浮层候选，再由 CDP 执行输入和点击；没有模型参与页面操作。导航完成后同时核对 URL、可见城市/地址/日期及 CNY 币种；采集后再次核对，条件变化时丢弃数据并保留旧存储。单阶段等待有上限，等待可取消，登录、验证及拒绝访问立即停止。
+
+成功查询的 collection 增加可选 `search`，保存 requested、实际城市/地址/日期文字、站点当前房间/人数、conditionsVerified 及 locationMode。`poi` 表示站点选择了地点，未独立验证地理坐标；`keyword` 仅按地址文字查询，不保证附近半径或距离排序。不支持输入人数/房型/距离。
+
+maxPrice 为可选人民币元上限，仅在本批已采集记录中筛选明示起价或每晚价格。高于上限的记录排除并计入 budgetExcluded；条件价、总价、缺价和口径未知的记录保留并计入 budgetUnverified，UI 明示预算待核实。不能把筛选后零条记录解释成全站无房或该地点无酒店。
 
 ## 采集与状态
 
@@ -43,4 +54,4 @@ MCP 工具 `list_pages`、`open_page`、`collect_page` 复用相应处理器。�
 
 只使用可信运行上下文的 `run.state.profile`，由宿主按真实用户及 Profile 隔离，不接受调用方传入分区身份。键为 `last-collection-v1`，版本为 1，存储已校验的 `collection`。无记录返回 `present:false`；读取到非法记录时抛出错误，不自动覆盖或猜测默认值。
 
-采集结果包含 `schemaVersion:1`；首次发布无历史数据迁移。后续不兼容变更须升级版本、实现迁移并补充说明与测试。脚手架 greeting/settings 示例未在本插件发布，不做兼容。
+采集结果包含 `schemaVersion:1`；v0.2 为 collection 添加可选 search，不改变已有字段含义；v0.1 记录无该字段仍可读，无需迁移。后续不兼容变更须升级版本、实现迁移并补充说明与测试。脚手架 greeting/settings 示例未在本插件发布，不做兼容。

@@ -20,7 +20,7 @@ export function publicUrl(value) {
     const url = new URL(value)
     if (url.protocol !== 'https:') return ''
     url.username = ''; url.password = ''; url.hash = ''
-    for (const key of [...url.searchParams.keys()]) if (!/^(keyword|cityId|cityName|checkIn|checkOut|adult|crn|type|source)$/i.test(key)) url.searchParams.delete(key)
+    for (const key of [...url.searchParams.keys()]) if (!/^(keyword|cityId|cityName|destName|searchWord|searchType|searchValue|optionId|directSearch|checkIn|checkOut|adult|crn|listFilters|curr|locale|type|source)$/i.test(key)) url.searchParams.delete(key)
     return url.href.slice(0, 4096)
   } catch { return '' }
 }

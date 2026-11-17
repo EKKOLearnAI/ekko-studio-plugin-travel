@@ -569,6 +569,123 @@
             "excerpt"
           ],
           "additionalProperties": false
+        },
+        "search": {
+          "type": "object",
+          "description": "本次酒店查询实际采用的条件。仅当 URL 和可见输入框核对成功才返回。",
+          "properties": {
+            "requested": {
+              "type": "object",
+              "description": "按城市及地址/商圈/地标查携程酒店。日期按北京时间校验；预算只筛选已采集展示价。",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "城市名称；通过站点联想项选择，不猜测城市 ID。",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "address": {
+                  "type": "string",
+                  "description": "城市内地址、商圈或地标；无法定位时仅作关键词，不承诺附近距离。",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "checkIn": {
+                  "type": "string",
+                  "description": "入住日期 YYYY-MM-DD，不早于北京时间今天。",
+                  "minLength": 10,
+                  "maxLength": 10
+                },
+                "checkOut": {
+                  "type": "string",
+                  "description": "离店日期 YYYY-MM-DD，晚于入住且最多 30 晚。",
+                  "minLength": 10,
+                  "maxLength": 10
+                },
+                "maxPrice": {
+                  "type": "number",
+                  "description": "可选展示价上限，人民币元；不明确的金额/总价/条件价保留待核实，不冒充已符合预算。",
+                  "minimum": 1,
+                  "maximum": 99999
+                }
+              },
+              "required": [
+                "city",
+                "address",
+                "checkIn",
+                "checkOut"
+              ],
+              "additionalProperties": false
+            },
+            "conditionsVerified": {
+              "type": "boolean",
+              "description": "查询与采集后均核对城市、地址、入住和离店条件。"
+            },
+            "locationMode": {
+              "type": "string",
+              "description": "poi 为站点选中的地点；keyword 仅是地址文字匹配，未验证坐标或半径。",
+              "enum": [
+                "poi",
+                "keyword"
+              ]
+            },
+            "selectedLocation": {
+              "type": "string",
+              "description": "站点联想项可见描述；无精确匹配时为空。",
+              "maxLength": 300
+            },
+            "city": {
+              "type": "string",
+              "description": "结果页可见城市。",
+              "maxLength": 200
+            },
+            "address": {
+              "type": "string",
+              "description": "结果页可见位置关键词。",
+              "maxLength": 300
+            },
+            "checkInText": {
+              "type": "string",
+              "description": "结果页可见入住日期原文。",
+              "maxLength": 100
+            },
+            "checkOutText": {
+              "type": "string",
+              "description": "结果页可见离店日期原文。",
+              "maxLength": 100
+            },
+            "guests": {
+              "type": "string",
+              "description": "站点当前房间与入住人数原文；尚不接受人数筛选输入。",
+              "maxLength": 100
+            },
+            "budgetExcluded": {
+              "type": "integer",
+              "description": "本批记录中明确展示价超过预算而排除的数量；不是全站计数。",
+              "minimum": 0,
+              "maximum": 40
+            },
+            "budgetUnverified": {
+              "type": "integer",
+              "description": "本批保留但价格口径不明、未能核实预算的数量。",
+              "minimum": 0,
+              "maximum": 40
+            }
+          },
+          "required": [
+            "requested",
+            "conditionsVerified",
+            "locationMode",
+            "selectedLocation",
+            "city",
+            "address",
+            "checkInText",
+            "checkOutText",
+            "guests",
+            "budgetExcluded",
+            "budgetUnverified"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -800,6 +917,123 @@
                 "matchedLinks",
                 "articleCharacters",
                 "excerpt"
+              ],
+              "additionalProperties": false
+            },
+            "search": {
+              "type": "object",
+              "description": "本次酒店查询实际采用的条件。仅当 URL 和可见输入框核对成功才返回。",
+              "properties": {
+                "requested": {
+                  "type": "object",
+                  "description": "按城市及地址/商圈/地标查携程酒店。日期按北京时间校验；预算只筛选已采集展示价。",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "description": "城市名称；通过站点联想项选择，不猜测城市 ID。",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "城市内地址、商圈或地标；无法定位时仅作关键词，不承诺附近距离。",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "checkIn": {
+                      "type": "string",
+                      "description": "入住日期 YYYY-MM-DD，不早于北京时间今天。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "checkOut": {
+                      "type": "string",
+                      "description": "离店日期 YYYY-MM-DD，晚于入住且最多 30 晚。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "maxPrice": {
+                      "type": "number",
+                      "description": "可选展示价上限，人民币元；不明确的金额/总价/条件价保留待核实，不冒充已符合预算。",
+                      "minimum": 1,
+                      "maximum": 99999
+                    }
+                  },
+                  "required": [
+                    "city",
+                    "address",
+                    "checkIn",
+                    "checkOut"
+                  ],
+                  "additionalProperties": false
+                },
+                "conditionsVerified": {
+                  "type": "boolean",
+                  "description": "查询与采集后均核对城市、地址、入住和离店条件。"
+                },
+                "locationMode": {
+                  "type": "string",
+                  "description": "poi 为站点选中的地点；keyword 仅是地址文字匹配，未验证坐标或半径。",
+                  "enum": [
+                    "poi",
+                    "keyword"
+                  ]
+                },
+                "selectedLocation": {
+                  "type": "string",
+                  "description": "站点联想项可见描述；无精确匹配时为空。",
+                  "maxLength": 300
+                },
+                "city": {
+                  "type": "string",
+                  "description": "结果页可见城市。",
+                  "maxLength": 200
+                },
+                "address": {
+                  "type": "string",
+                  "description": "结果页可见位置关键词。",
+                  "maxLength": 300
+                },
+                "checkInText": {
+                  "type": "string",
+                  "description": "结果页可见入住日期原文。",
+                  "maxLength": 100
+                },
+                "checkOutText": {
+                  "type": "string",
+                  "description": "结果页可见离店日期原文。",
+                  "maxLength": 100
+                },
+                "guests": {
+                  "type": "string",
+                  "description": "站点当前房间与入住人数原文；尚不接受人数筛选输入。",
+                  "maxLength": 100
+                },
+                "budgetExcluded": {
+                  "type": "integer",
+                  "description": "本批记录中明确展示价超过预算而排除的数量；不是全站计数。",
+                  "minimum": 0,
+                  "maximum": 40
+                },
+                "budgetUnverified": {
+                  "type": "integer",
+                  "description": "本批保留但价格口径不明、未能核实预算的数量。",
+                  "minimum": 0,
+                  "maximum": 40
+                }
+              },
+              "required": [
+                "requested",
+                "conditionsVerified",
+                "locationMode",
+                "selectedLocation",
+                "city",
+                "address",
+                "checkInText",
+                "checkOutText",
+                "guests",
+                "budgetExcluded",
+                "budgetUnverified"
               ],
               "additionalProperties": false
             }
@@ -1201,6 +1435,706 @@
                 "excerpt"
               ],
               "additionalProperties": false
+            },
+            "search": {
+              "type": "object",
+              "description": "本次酒店查询实际采用的条件。仅当 URL 和可见输入框核对成功才返回。",
+              "properties": {
+                "requested": {
+                  "type": "object",
+                  "description": "按城市及地址/商圈/地标查携程酒店。日期按北京时间校验；预算只筛选已采集展示价。",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "description": "城市名称；通过站点联想项选择，不猜测城市 ID。",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "城市内地址、商圈或地标；无法定位时仅作关键词，不承诺附近距离。",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "checkIn": {
+                      "type": "string",
+                      "description": "入住日期 YYYY-MM-DD，不早于北京时间今天。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "checkOut": {
+                      "type": "string",
+                      "description": "离店日期 YYYY-MM-DD，晚于入住且最多 30 晚。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "maxPrice": {
+                      "type": "number",
+                      "description": "可选展示价上限，人民币元；不明确的金额/总价/条件价保留待核实，不冒充已符合预算。",
+                      "minimum": 1,
+                      "maximum": 99999
+                    }
+                  },
+                  "required": [
+                    "city",
+                    "address",
+                    "checkIn",
+                    "checkOut"
+                  ],
+                  "additionalProperties": false
+                },
+                "conditionsVerified": {
+                  "type": "boolean",
+                  "description": "查询与采集后均核对城市、地址、入住和离店条件。"
+                },
+                "locationMode": {
+                  "type": "string",
+                  "description": "poi 为站点选中的地点；keyword 仅是地址文字匹配，未验证坐标或半径。",
+                  "enum": [
+                    "poi",
+                    "keyword"
+                  ]
+                },
+                "selectedLocation": {
+                  "type": "string",
+                  "description": "站点联想项可见描述；无精确匹配时为空。",
+                  "maxLength": 300
+                },
+                "city": {
+                  "type": "string",
+                  "description": "结果页可见城市。",
+                  "maxLength": 200
+                },
+                "address": {
+                  "type": "string",
+                  "description": "结果页可见位置关键词。",
+                  "maxLength": 300
+                },
+                "checkInText": {
+                  "type": "string",
+                  "description": "结果页可见入住日期原文。",
+                  "maxLength": 100
+                },
+                "checkOutText": {
+                  "type": "string",
+                  "description": "结果页可见离店日期原文。",
+                  "maxLength": 100
+                },
+                "guests": {
+                  "type": "string",
+                  "description": "站点当前房间与入住人数原文；尚不接受人数筛选输入。",
+                  "maxLength": 100
+                },
+                "budgetExcluded": {
+                  "type": "integer",
+                  "description": "本批记录中明确展示价超过预算而排除的数量；不是全站计数。",
+                  "minimum": 0,
+                  "maximum": 40
+                },
+                "budgetUnverified": {
+                  "type": "integer",
+                  "description": "本批保留但价格口径不明、未能核实预算的数量。",
+                  "minimum": 0,
+                  "maximum": 40
+                }
+              },
+              "required": [
+                "requested",
+                "conditionsVerified",
+                "locationMode",
+                "selectedLocation",
+                "city",
+                "address",
+                "checkInText",
+                "checkOutText",
+                "guests",
+                "budgetExcluded",
+                "budgetUnverified"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "source",
+            "tabId",
+            "url",
+            "pageTitle",
+            "collectedAt",
+            "status",
+            "message",
+            "records",
+            "warnings",
+            "diagnostics"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "type": "string",
+          "description": "工具错误说明。",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "ok",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "hotel-query": {
+      "type": "object",
+      "description": "按城市及地址/商圈/地标查携程酒店。日期按北京时间校验；预算只筛选已采集展示价。",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "城市名称；通过站点联想项选择，不猜测城市 ID。",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "address": {
+          "type": "string",
+          "description": "城市内地址、商圈或地标；无法定位时仅作关键词，不承诺附近距离。",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "checkIn": {
+          "type": "string",
+          "description": "入住日期 YYYY-MM-DD，不早于北京时间今天。",
+          "minLength": 10,
+          "maxLength": 10
+        },
+        "checkOut": {
+          "type": "string",
+          "description": "离店日期 YYYY-MM-DD，晚于入住且最多 30 晚。",
+          "minLength": 10,
+          "maxLength": 10
+        },
+        "maxPrice": {
+          "type": "number",
+          "description": "可选展示价上限，人民币元；不明确的金额/总价/条件价保留待核实，不冒充已符合预算。",
+          "minimum": 1,
+          "maximum": 99999
+        }
+      },
+      "required": [
+        "city",
+        "address",
+        "checkIn",
+        "checkOut"
+      ],
+      "additionalProperties": false
+    },
+    "hotel-page-command": {
+      "type": "object",
+      "description": "固定搜索脚本内部命令；不接受用户提供脚本。",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "只读检查，或聚焦并全选一个可见搜索输入。",
+          "enum": [
+            "inspect",
+            "focus"
+          ]
+        },
+        "field": {
+          "type": "string",
+          "description": "指定城市或地址框。",
+          "enum": [
+            "city",
+            "address"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "description": "用于精确匹配联想项的文本。",
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "hotel-page-state": {
+      "type": "object",
+      "description": "酒店查询页的有限可见表单状态，不读取账户、Cookie 或页面全局。",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "当前页面完整 URL，仅内部核对。",
+          "maxLength": 8192
+        },
+        "readyState": {
+          "type": "string",
+          "description": "文档加载状态。",
+          "enum": [
+            "loading",
+            "interactive",
+            "complete"
+          ]
+        },
+        "blocking": {
+          "type": "string",
+          "description": "明确的阻断/验证/登录状态；空串表示未匹配。",
+          "enum": [
+            "",
+            "blocked",
+            "verification_required",
+            "login_required"
+          ]
+        },
+        "controlsReady": {
+          "type": "boolean",
+          "description": "已匹配可见城市、地址输入和搜索按钮。"
+        },
+        "city": {
+          "type": "string",
+          "description": "城市输入值。",
+          "maxLength": 200
+        },
+        "address": {
+          "type": "string",
+          "description": "地址输入值。",
+          "maxLength": 300
+        },
+        "checkInText": {
+          "type": "string",
+          "description": "入住日期可见原文。",
+          "maxLength": 100
+        },
+        "checkOutText": {
+          "type": "string",
+          "description": "离店日期可见原文。",
+          "maxLength": 100
+        },
+        "guests": {
+          "type": "string",
+          "description": "房间和入住人数可见原文。",
+          "maxLength": 100
+        },
+        "button": {
+          "type": "object",
+          "description": "当前可见控件中心的视口坐标。",
+          "properties": {
+            "x": {
+              "type": "number",
+              "description": "横向 CSS 像素。",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "y": {
+              "type": "number",
+              "description": "纵向 CSS 像素。",
+              "minimum": 0,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        "candidates": {
+          "type": "array",
+          "description": "最多 12 个精确地点候选；多个匹配时拒绝自动选择。",
+          "items": {
+            "type": "object",
+            "description": "输入框附近精确匹配的可见地点项。",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "地点标题。",
+                "maxLength": 200
+              },
+              "detail": {
+                "type": "string",
+                "description": "标题附近的可见描述。",
+                "maxLength": 300
+              },
+              "x": {
+                "type": "number",
+                "description": "横向 CSS 像素。",
+                "minimum": 0,
+                "maximum": 100000
+              },
+              "y": {
+                "type": "number",
+                "description": "纵向 CSS 像素。",
+                "minimum": 0,
+                "maximum": 100000
+              }
+            },
+            "required": [
+              "label",
+              "detail",
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 12
+        },
+        "documentTime": {
+          "type": "number",
+          "description": "文档 performance.timeOrigin，用于区分一次完整导航和旧页面状态。",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "url",
+        "readyState",
+        "blocking",
+        "controlsReady",
+        "city",
+        "address",
+        "checkInText",
+        "checkOutText",
+        "guests",
+        "button",
+        "candidates",
+        "documentTime"
+      ],
+      "additionalProperties": false
+    },
+    "tool-hotel-search": {
+      "type": "object",
+      "description": "酒店查询工具的已校验结果或显式错误。",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "业务是否获得可用结果。"
+        },
+        "content": {
+          "type": "string",
+          "description": "状态说明。",
+          "maxLength": 2000
+        },
+        "data": {
+          "type": "object",
+          "description": "一次固定脚本采集的结果，状态和记录完整校验。",
+          "properties": {
+            "schemaVersion": {
+              "type": "integer",
+              "description": "结果结构版本。",
+              "enum": [
+                1
+              ]
+            },
+            "source": {
+              "type": "string",
+              "description": "来源标识。",
+              "enum": [
+                "ctrip",
+                "xiaohongshu",
+                "meituan",
+                "ctrip-guide",
+                "mafengwo"
+              ]
+            },
+            "tabId": {
+              "type": "string",
+              "description": "此次采集的宿主标签页 ID。",
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+              "maxLength": 4096
+            },
+            "pageTitle": {
+              "type": "string",
+              "description": "页面标题。",
+              "maxLength": 500
+            },
+            "collectedAt": {
+              "type": "integer",
+              "description": "采集时间，Unix 毫秒。",
+              "minimum": 0
+            },
+            "status": {
+              "type": "string",
+              "description": "ok 正文；partial 不完整信息；其他状态明确说明未取到数据的原因。",
+              "enum": [
+                "ok",
+                "partial",
+                "login_required",
+                "verification_required",
+                "blocked",
+                "loading",
+                "empty",
+                "layout_changed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "可读的状态说明。",
+              "maxLength": 1000
+            },
+            "records": {
+              "type": "array",
+              "description": "有效数据；失败时为空。",
+              "items": {
+                "type": "object",
+                "description": "清洗后的旅游记录，不包含推断的实时房态、日期或套餐条件。",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "description": "hotel 酒店卡片；deal 团购卡片；guide 完整正文；guide_link 列表摘要。",
+                    "enum": [
+                      "hotel",
+                      "deal",
+                      "guide",
+                      "guide_link"
+                    ]
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "标题或酒店名称。",
+                    "maxLength": 300
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                    "maxLength": 4096
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "正文或卡片摘要；列表链接可为空。",
+                    "maxLength": 20000
+                  },
+                  "images": {
+                    "type": "array",
+                    "description": "正文中的图片 URL；尚未执行 OCR。",
+                    "items": {
+                      "type": "string",
+                      "description": "经清理的 HTTPS 来源地址；不返回平台会话参数。",
+                      "maxLength": 4096
+                    },
+                    "maxItems": 12
+                  },
+                  "price": {
+                    "type": "object",
+                    "description": "页面价格原文与可确定的金额。未知金额省略 amountMinor/currency。",
+                    "properties": {
+                      "raw": {
+                        "type": "string",
+                        "description": "价格原文；未找到时为空。",
+                        "maxLength": 300
+                      },
+                      "basis": {
+                        "type": "string",
+                        "description": "starting 起价；conditional 条件价；total 总价；per_night 每晚价；unknown 未知口径。",
+                        "enum": [
+                          "unknown",
+                          "starting",
+                          "conditional",
+                          "total",
+                          "per_night"
+                        ]
+                      },
+                      "amountMinor": {
+                        "type": "integer",
+                        "description": "人民币分，必须是明确的单一正金额。",
+                        "minimum": 1,
+                        "maximum": 100000000
+                      },
+                      "currency": {
+                        "type": "string",
+                        "description": "币种，只解析明确人民币符号。",
+                        "enum": [
+                          "CNY"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "raw",
+                      "basis"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "title",
+                  "url",
+                  "text",
+                  "images",
+                  "price"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 40
+            },
+            "warnings": {
+              "type": "array",
+              "description": "信息缺失和使用边界。",
+              "items": {
+                "type": "string",
+                "description": "单条说明。",
+                "maxLength": 1000
+              },
+              "maxItems": 20
+            },
+            "diagnostics": {
+              "type": "object",
+              "description": "用于本地核对的有限诊断，不写入公开仓库。",
+              "properties": {
+                "readyState": {
+                  "type": "string",
+                  "description": "浏览器加载状态。",
+                  "enum": [
+                    "loading",
+                    "interactive",
+                    "complete"
+                  ]
+                },
+                "matchedBlocks": {
+                  "type": "integer",
+                  "description": "匹配到的卡片数。",
+                  "minimum": 0
+                },
+                "matchedLinks": {
+                  "type": "integer",
+                  "description": "匹配到的原文链接数。",
+                  "minimum": 0
+                },
+                "articleCharacters": {
+                  "type": "integer",
+                  "description": "读取到的正文字符数。",
+                  "minimum": 0
+                },
+                "excerpt": {
+                  "type": "string",
+                  "description": "可见页面文本的有限片段，非表单输入。",
+                  "maxLength": 1600
+                }
+              },
+              "required": [
+                "readyState",
+                "matchedBlocks",
+                "matchedLinks",
+                "articleCharacters",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            },
+            "search": {
+              "type": "object",
+              "description": "本次酒店查询实际采用的条件。仅当 URL 和可见输入框核对成功才返回。",
+              "properties": {
+                "requested": {
+                  "type": "object",
+                  "description": "按城市及地址/商圈/地标查携程酒店。日期按北京时间校验；预算只筛选已采集展示价。",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "description": "城市名称；通过站点联想项选择，不猜测城市 ID。",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "城市内地址、商圈或地标；无法定位时仅作关键词，不承诺附近距离。",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "checkIn": {
+                      "type": "string",
+                      "description": "入住日期 YYYY-MM-DD，不早于北京时间今天。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "checkOut": {
+                      "type": "string",
+                      "description": "离店日期 YYYY-MM-DD，晚于入住且最多 30 晚。",
+                      "minLength": 10,
+                      "maxLength": 10
+                    },
+                    "maxPrice": {
+                      "type": "number",
+                      "description": "可选展示价上限，人民币元；不明确的金额/总价/条件价保留待核实，不冒充已符合预算。",
+                      "minimum": 1,
+                      "maximum": 99999
+                    }
+                  },
+                  "required": [
+                    "city",
+                    "address",
+                    "checkIn",
+                    "checkOut"
+                  ],
+                  "additionalProperties": false
+                },
+                "conditionsVerified": {
+                  "type": "boolean",
+                  "description": "查询与采集后均核对城市、地址、入住和离店条件。"
+                },
+                "locationMode": {
+                  "type": "string",
+                  "description": "poi 为站点选中的地点；keyword 仅是地址文字匹配，未验证坐标或半径。",
+                  "enum": [
+                    "poi",
+                    "keyword"
+                  ]
+                },
+                "selectedLocation": {
+                  "type": "string",
+                  "description": "站点联想项可见描述；无精确匹配时为空。",
+                  "maxLength": 300
+                },
+                "city": {
+                  "type": "string",
+                  "description": "结果页可见城市。",
+                  "maxLength": 200
+                },
+                "address": {
+                  "type": "string",
+                  "description": "结果页可见位置关键词。",
+                  "maxLength": 300
+                },
+                "checkInText": {
+                  "type": "string",
+                  "description": "结果页可见入住日期原文。",
+                  "maxLength": 100
+                },
+                "checkOutText": {
+                  "type": "string",
+                  "description": "结果页可见离店日期原文。",
+                  "maxLength": 100
+                },
+                "guests": {
+                  "type": "string",
+                  "description": "站点当前房间与入住人数原文；尚不接受人数筛选输入。",
+                  "maxLength": 100
+                },
+                "budgetExcluded": {
+                  "type": "integer",
+                  "description": "本批记录中明确展示价超过预算而排除的数量；不是全站计数。",
+                  "minimum": 0,
+                  "maximum": 40
+                },
+                "budgetUnverified": {
+                  "type": "integer",
+                  "description": "本批保留但价格口径不明、未能核实预算的数量。",
+                  "minimum": 0,
+                  "maximum": 40
+                }
+              },
+              "required": [
+                "requested",
+                "conditionsVerified",
+                "locationMode",
+                "selectedLocation",
+                "city",
+                "address",
+                "checkInText",
+                "checkOutText",
+                "guests",
+                "budgetExcluded",
+                "budgetUnverified"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -1256,6 +2190,11 @@
       "description": "读取当前用户/Profile 最近结果。",
       "input": "null",
       "output": "last-result"
+    },
+    "search-hotels": {
+      "description": "按城市和地址/地标查询酒店，核对条件后采集并保存结果。",
+      "input": "hotel-query",
+      "output": "collection"
     }
   },
   "tools": {
@@ -1273,6 +2212,11 @@
       "description": "采集旅游页面并保存最近结果。",
       "input": "collect-input",
       "output": "tool-collection"
+    },
+    "search_hotels": {
+      "description": "固定脚本按城市和地址查询酒店，明确返回地点/关键词模式及预算核实情况。",
+      "input": "hotel-query",
+      "output": "tool-hotel-search"
     }
   },
   "commands": {},
