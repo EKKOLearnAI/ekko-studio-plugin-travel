@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test'
-import { readFileSync } from 'node:fs'
 import { apply } from '../../server.mjs'
 
-const clientSource = readFileSync(new URL('../../client.mjs', import.meta.url), 'utf8')
 const day = offset => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + offset * 86400000))
 const query = () => ({ city: '苏州', address: '苏州站', checkIn: day(1), checkOut: day(2), maxPrice: 300 })
 
@@ -61,7 +59,7 @@ function hotelFixture(url, { ambiguous = false, keywordOnly = false, blocked = f
 }
 async function runtime(context, options = {}) {
   await context.route('https://hotels.ctrip.com/**', route => route.fulfill({ contentType: 'text/html; charset=utf-8', body: hotelFixture(route.request().url(), options) }))
-  const methods = new Map(), storage = new Map(), calls = [], tabs = new Map()
+  const methods = new Map(), tools = new Map(), storage = new Map(), calls = [], tabs = new Map()
   let session, hotelPage, captured = false
   const controller = new AbortController()
   const browser = { tabs: {
@@ -81,31 +79,20 @@ async function runtime(context, options = {}) {
     },
   } }
   const run = { identity: { userId: 7, profile: 'travel-test' }, signal: controller.signal, host: { browser }, state: { profile: { get: async key => storage.get(key), set: async (key, value) => storage.set(key, value) } } }
-  apply({ extensions: { rpc: { register: (name, handler) => methods.set(name, handler) }, tools: { register: () => {} } } })
-  return { call: (name, input) => methods.get(name)(input, run), calls, storage, controller, get hotelPage() { return hotelPage }, get captured() { return captured } }
+  apply({ extensions: { rpc: { register: (name, handler) => methods.set(name, handler) }, tools: { register: tool => tools.set(tool.name, tool) } } })
+  return { call: (name, input) => methods.get(name)(input, run), tool: (name, input) => tools.get(name).execute(input, run), calls, storage, controller, get hotelPage() { return hotelPage }, get captured() { return captured } }
 }
 
-test('address search executes the real fixed CDP flow, verifies conditions and labels uncertain budget records', async ({ context, page }) => {
+test('hotel MCP executes the real fixed CDP flow, verifies conditions and marks uncertain budget records', async ({ context }) => {
   const host = await runtime(context)
-  await page.setContent('<div id="root"></div>')
-  await page.exposeFunction('travelRpc', (name, input = null) => host.call(name, input))
-  await page.evaluate(async source => {
-    const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }))
-    try { await (await import(url)).mount(document.getElementById('root'), { lifecycle: { add: () => {} }, rpc: { call: (...args) => window.travelRpc(...args) } }) }
-    finally { URL.revokeObjectURL(url) }
-  }, clientSource)
   const request = query()
-  await page.getByLabel('城市', { exact: true }).fill(request.city)
-  await page.getByLabel('地址 / 商圈 / 地标').fill(request.address)
-  await page.getByLabel('入住日期').fill(request.checkIn)
-  await page.getByLabel('离店日期').fill(request.checkOut)
-  await page.getByLabel('展示价上限').fill('300')
-  await page.getByRole('button', { name: '查找酒店', exact: true }).click()
-  await expect(page.locator('#travel-status')).toHaveText('部分数据', { timeout: 20000 })
-  await expect(page.locator('.record')).toHaveCount(3)
-  await expect(page.locator('#travel-result')).toContainText('已选择站点地点')
-  await expect(page.locator('#travel-result')).toContainText('预算待核实')
-  const result = host.storage.get('last-collection-v1')
+  const response = await host.tool('search_hotels', request)
+  expect(response.ok).toBe(true)
+  const result = JSON.parse(response.content)
+  expect(result).toEqual(response.data)
+  expect(result.status).toBe('partial')
+  expect(result.records).toHaveLength(3)
+  expect(host.storage.get('last-collection-v1')).toEqual(result)
   expect(result.search).toMatchObject({ requested: request, conditionsVerified: true, locationMode: 'poi', budgetExcluded: 1, budgetUnverified: 2 })
   expect(new URL(host.hotelPage.url()).searchParams.get('cityName')).toBe('苏州')
   expect(result.url).toContain('searchWord=')

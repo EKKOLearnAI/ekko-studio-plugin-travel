@@ -24,7 +24,8 @@ export function publicUrl(value) {
     const url = new URL(value)
     if (url.protocol !== 'https:') return ''
     url.username = ''; url.password = ''; url.hash = ''
-    for (const key of [...url.searchParams.keys()]) if (!/^(keyword|cityId|cityName|destName|searchWord|searchType|searchValue|optionId|directSearch|checkIn|checkOut|adult|crn|listFilters|curr|locale|type|source|ticketType|dStation|aStation|dDate|rDate|trainsType|hubCityName|highSpeedOnly|depdate|cabin|child|infant)$/i.test(key)) url.searchParams.delete(key)
+    const guideIds = /(^|\.)mafengwo\.cn$/.test(url.hostname)
+    for (const key of [...url.searchParams.keys()]) if (!/^(q|keyword|cityId|cityName|destName|searchWord|searchType|searchValue|optionId|directSearch|checkIn|checkOut|adult|crn|listFilters|curr|locale|type|source|ticketType|dStation|aStation|dDate|rDate|trainsType|hubCityName|highSpeedOnly|depdate|cabin|child|infant)$/i.test(key) && !(guideIds && ['id','gid','aggregate_id'].includes(key) && /^\d+$/.test(url.searchParams.get(key)))) url.searchParams.delete(key)
     return url.href.slice(0, 4096)
   } catch { return '' }
 }

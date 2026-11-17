@@ -1,12 +1,13 @@
 {
   "id": "travel",
-  "name": "旅行助手 · 采集调试",
-  "version": "0.3.0",
+  "name": "去哪玩",
+  "version": "0.5.1",
   "apiVersion": 1,
-  "description": "通过 Studio 内置浏览器查询酒店、动车和国内单程机票，固定脚本核对条件并清洗报价、余票及图文攻略，提供结构化 MCP 工具。",
+  "description": "对话查询酒店、交通、高德路线和三站攻略；多通道提取、发布时间证据与攻略图片识别，页面变化时明确交给当前 Agent 接管。",
   "author": {
-    "name": "EKKOLearnAI"
+    "name": "ekko"
   },
+  "icon": "assets/icon.png",
   "repository": "https://github.com/EKKOLearnAI/ekko-studio-plugin-travel",
   "license": "MIT",
   "keywords": [
@@ -16,31 +17,13 @@
     "mcp"
   ],
   "server": "server.mjs",
-  "client": "client.mjs",
   "permissions": [
-    "ui",
     "tools",
-    "browser.cdp"
+    "browser.cdp",
+    "api.read",
+    "api.write"
   ],
   "mcp": {
     "name": "travel"
-  },
-  "views": [
-    {
-      "id": "collector",
-      "title": "旅行数据采集",
-      "slot": "page",
-      "icon": "book"
-    }
-  ],
-  "navigation": {
-    "main": [
-      {
-        "viewId": "collector",
-        "title": "旅行助手",
-        "icon": "book",
-        "order": 50
-      }
-    ]
   }
 }

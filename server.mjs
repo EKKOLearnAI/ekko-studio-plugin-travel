@@ -4,10 +4,14 @@ import { SOURCES } from './src/sources.mjs'
 import { listTabs, openPage, collectPage } from './src/browser.mjs'
 import { searchHotels } from './src/hotel-search.mjs'
 import { searchTransport } from './src/transport.mjs'
+import { registerAmapTools } from './src/amap.mjs'
+import { registerGuideTools } from './src/guide-tools.mjs'
 const contract = assertContracts(JSON.parse(readFileSync(new URL('./contracts/plugin.json', import.meta.url), 'utf8')))
 
 /** @param {import('@ekko-studio/plugin-sdk').PluginContext} ctx */
 export function apply(ctx) {
+  registerAmapTools(ctx, contract)
+  registerGuideTools(ctx, contract)
   const traffic = mode => async (input, run) => {
     const result = await searchTransport(input, mode, run, contract)
     run.signal.throwIfAborted()
@@ -27,13 +31,13 @@ export function apply(ctx) {
     'search-hotels': async (input, run) => {
       const result = await searchHotels(input, run, contract)
       run.signal.throwIfAborted()
-      await run.state.profile.set('last-collection-v1', validateModel(contract, 'collection', result))
+      if (['ok', 'partial', 'empty'].includes(result.status)) await run.state.profile.set('last-collection-v1', validateModel(contract, 'collection', result))
       return result
     },
     'collect-page': async (input, run) => {
       const result = await collectPage(input, run, contract)
       run.signal.throwIfAborted()
-      await run.state.profile.set('last-collection-v1', validateModel(contract, 'collection', result))
+      if (['ok', 'partial', 'empty'].includes(result.status)) await run.state.profile.set('last-collection-v1', validateModel(contract, 'collection', result))
       return result
     },
     'last-result': async (_input, run) => {

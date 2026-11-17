@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { readFileSync } from 'node:fs'
 import { apply } from '../../server.mjs'
-const clientSource = readFileSync(new URL('../../client.mjs', import.meta.url), 'utf8')
 const day = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + 3 * 86400000))
 const query = mode => ({ from: '上海', to: mode === 'train' ? '杭州' : '北京', departureDate: day() })
 // Synthetic pages model the inspected public DOM, never captured account data.
@@ -60,18 +58,15 @@ test('train MCP executes fixed CDP query, filters G/D/C and preserves distinct s
   expect(host.storage.has('last-collection-v1')).toBe(false)
   expect(host.calls.at(-1)).toBe('release')
 })
-test('flight UI selects aggregate cities, lazy-loads flight numbers, avoids discount prices and excludes connections', async ({ context, page }) => {
+test('flight MCP selects aggregate cities, lazy-loads flight numbers, avoids discount prices and excludes connections', async ({ context }) => {
   const host = await runtime(context)
-  await page.setContent('<div id="root"></div>')
-  await page.exposeFunction('travelRpc', (name, input = null) => host.call(name, input))
-  await page.evaluate(async source => { const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' })); try { await (await import(url)).mount(document.getElementById('root'), { lifecycle: { add: () => {} }, rpc: { call: (...args) => window.travelRpc(...args) } }) } finally { URL.revokeObjectURL(url) } }, clientSource)
-  await page.getByLabel('查询类型').selectOption('flight')
-  const q = query('flight')
-  await page.getByLabel('出发地', { exact: true }).fill(q.from);await page.getByLabel('目的地', { exact: true }).fill(q.to);await page.getByLabel('出发日期', { exact: true }).fill(q.departureDate)
-  await page.getByRole('button', { name: '查询交通', exact: true }).click()
-  await expect(page.locator('.record')).toHaveCount(2, { timeout: 20000 })
-  await expect(page.locator('#travel-result')).toContainText('税费、行李及退改待核实')
-  const r = host.storage.get('last-transport-v1')
+  const response = await host.tool('search_flights', query('flight'))
+  expect(response.ok).toBe(true)
+  const r = JSON.parse(response.content)
+  expect(r).toEqual(response.data)
+  expect(r.records).toHaveLength(2)
+  expect(r.records.every(record => record.feeInclusion === 'unknown')).toBe(true)
+  expect(host.storage.get('last-transport-v1')).toEqual(r)
   expect(r.conditionsVerified).toBe(true);expect(r.records[0].price).toMatchObject({ amountMinor: 42700, basis: 'conditional' })
   expect(r.records[1].price).toMatchObject({ amountMinor: 49000, basis: 'starting' })
   expect(r.records[1].serviceCodes).toEqual(['CA1000', 'MU1000'])

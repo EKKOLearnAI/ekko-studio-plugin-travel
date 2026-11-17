@@ -3,6 +3,7 @@ import { captureExpression } from './capture.mjs'
 import { cleanSnapshot } from './clean.mjs'
 import { hotelAccessibilityBlocks } from './accessibility.mjs'
 import { validateModel } from '../sdk/harness/contracts.mjs'
+import { runGuide } from './guides.mjs'
 export async function listTabs(run, browser = run.host.browser) {
   run.signal.throwIfAborted()
   const value = await browser.tabs.list()
@@ -22,6 +23,17 @@ export async function collectPage(input, run, contract, browser = run.host.brows
   const source = sourceForUrl(tab.url)
   if (!source) throw new Error('只能采集支持的旅游站点')
   if (['train', 'flight'].includes(source.kind)) throw new Error('交通页面请使用 search_trains / search_flights，提供出发地、目的地和日期后查询')
+  if (source.kind === 'guide') {
+    const result = await runGuide('read_guide', input, { ...run, host: { ...run.host, browser } }, contract)
+    const known = contract.models.collection.properties.status.enum
+    return validateModel(contract, 'collection', {
+      schemaVersion: 1, source: source.id, tabId: tab.id, url: result.url || publicUrl(tab.url), pageTitle: tab.title?.slice(0, 500) || '',
+      collectedAt: result.collectedAt, status: known.includes(result.status) ? result.status : 'layout_changed', message: result.message,
+      records: result.records.map(row => ({ kind: row.extraction === 'link_semantics' ? 'guide_link' : 'guide', title: row.title, url: row.url, text: row.text, images: row.images.slice(0, 12).map(i => i.url), price: { raw: '', basis: 'unknown' } })),
+      warnings: [...result.warnings, '攻略的日期证据、图片索引和接管说明请使用 read_guide。', ...(result.nextAction ? [result.nextAction] : [])],
+      diagnostics: { readyState: 'complete', matchedBlocks: 0, matchedLinks: result.diagnostics?.matchedLinks || 0, articleCharacters: result.diagnostics?.articleCharacters || 0, excerpt: result.diagnostics?.excerpt || '' },
+    })
+  }
   await browser.cdp.attach(tab.id)
   try {
     return await collectAttachedPage(tab, source, run, contract, browser)

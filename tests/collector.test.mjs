@@ -109,7 +109,7 @@ test('MCP content contains the same structured hotel records as data', async () 
 
 test('MCP guide content remains valid JSON beyond the old summary length limit', async () => {
   const text = '路线说明。'.repeat(600)
-  const { tools, context } = setup(snapshot({ url: 'https://www.xiaohongshu.com/explore/example', article: { title: '样例攻略', text, images: [] } }))
+  const { tools, context } = setup({ url: 'https://www.xiaohongshu.com/explore/example', title: '样例攻略', readyState: 'complete', gate: '', excerpt: text.slice(0,800), empty: false, inputValues: [], detailKind: 'guide', rows: [], article: { title: '样例攻略', text, images: [], method: 'site_dom', dateRaw: '', publishedMeta: '', modifiedMeta: '', truncated: false } })
   const result = await tools.get('collect_page').execute({ tabId: 'tab-1' }, context())
   assert.equal(result.ok, true)
   assert.ok(result.content.length > 2000)
